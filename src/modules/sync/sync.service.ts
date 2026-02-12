@@ -1,6 +1,9 @@
 import { getDatabase } from '../../database/db';
 import { api } from '../../services/api';
 import { SyncPushPayload, SyncPullResponse } from './sync.types';
+import { Budget } from '../budgets/budget.types';
+import { Item } from '../items/item.types';
+import { getUnsyncedItems } from '../items/item.repository';
 
 /*
   Salva ou atualiza lastSyncAt localmente
@@ -44,15 +47,17 @@ async function getLastSync(): Promise<string> {
 async function pushChanges() {
     const db = getDatabase();
 
-    const unsyncedBudgets = await db.getAllAsync(
+    const unsyncedBudgets = await db.getAllAsync<Budget>(
         `SELECT * FROM budgets WHERE synced = 0`
     );
 
-    if (unsyncedBudgets.length === 0) return;
+    const unsyncedItems = await getUnsyncedItems();
+
+    if (unsyncedBudgets.length === 0 && unsyncedItems.length === 0) return;
 
     const payload: SyncPushPayload = {
         budgets: unsyncedBudgets,
-        items: []
+        items: unsyncedItems
     };
 
     await api.post('/sync/push', payload);
@@ -61,6 +66,13 @@ async function pushChanges() {
         await db.runAsync(
             `UPDATE budgets SET synced = 1 WHERE id = ?`,
             budget.id
+        );
+    }
+
+    for (const item of unsyncedItems) {
+        await db.runAsync(
+            `UPDATE items SET synced = 1 WHERE id = ?`,
+            item.id
         );
     }
 }
