@@ -1,5 +1,5 @@
 import { getDatabase } from '../../database/db';
-import { v4 as uuid } from 'uuid';
+import * as Crypto from 'expo-crypto';
 import { ItemType, Item } from './item.types';
 
 /*
@@ -14,7 +14,7 @@ export async function createItem(data: {
 }) {
     const db = getDatabase();
     const now = new Date().toISOString();
-    const id = uuid();
+    const id = Crypto.randomUUID();
 
     await db.runAsync(
         `

@@ -88,7 +88,7 @@ async function pullChanges() {
         `/sync/pull?since=${lastSyncAt}`
     );
 
-    const { budgets } = response.data;
+    const { budgets, items } = response.data;
 
     for (const budget of budgets) {
         await db.runAsync(
@@ -116,6 +116,36 @@ async function pullChanges() {
                 budget.created_at,
                 budget.updated_at,
                 budget.deleted_at ?? null
+            ]
+        );
+    }
+
+    for (const item of items) {
+        await db.runAsync(
+            `
+      INSERT INTO items
+      (id,budget_id,type,name,qty,unit_price,created_at,updated_at,deleted_at,synced)
+      VALUES (?,?,?,?,?,?,?,?,?,1)
+      ON CONFLICT(id) DO UPDATE SET
+        budget_id=excluded.budget_id,
+        type=excluded.type,
+        name=excluded.name,
+        qty=excluded.qty,
+        unit_price=excluded.unit_price,
+        updated_at=excluded.updated_at,
+        deleted_at=excluded.deleted_at,
+        synced=1
+      `,
+            [
+                item.id,
+                item.budget_id,
+                item.type,
+                item.name,
+                item.qty,
+                item.unit_price,
+                item.created_at,
+                item.updated_at,
+                item.deleted_at ?? null
             ]
         );
     }

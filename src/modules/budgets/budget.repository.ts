@@ -1,5 +1,5 @@
 import { getDatabase } from '../../database/db';
-import { v4 as uuid } from 'uuid';
+import * as Crypto from 'expo-crypto';
 import { Budget } from './budget.types';
 
 export async function createBudget(data: {
@@ -10,7 +10,7 @@ export async function createBudget(data: {
     const db = getDatabase();
     const now = new Date().toISOString();
 
-    const id = uuid();
+    const id = Crypto.randomUUID();
 
     await db.runAsync(
         `INSERT INTO budgets 
