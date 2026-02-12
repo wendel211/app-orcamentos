@@ -21,7 +21,7 @@ export default function BudgetsList() {
     return (
         <View style={{ flex: 1, padding: 16 }}>
             <Pressable
-                onPress={() => navigation.navigate('BudgetForm' as never)}
+                onPress={() => (navigation as any).navigate('BudgetForm')}
                 style={{
                     backgroundColor: '#111',
                     padding: 16,
@@ -40,7 +40,7 @@ export default function BudgetsList() {
                 renderItem={({ item }) => (
                     <Pressable
                         onPress={() =>
-                            navigation.navigate('BudgetDetails' as never, { id: item.id } as never)
+                            (navigation as any).navigate('BudgetDetails', { id: item.id })
                         }
                         style={{
                             padding: 16,

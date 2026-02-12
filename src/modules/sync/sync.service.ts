@@ -110,7 +110,7 @@ async function pullChanges() {
                 budget.id,
                 budget.title,
                 budget.client_name,
-                budget.address,
+                budget.address ?? null,
                 budget.discount,
                 budget.extra_fee,
                 budget.created_at,
