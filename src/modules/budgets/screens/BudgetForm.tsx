@@ -15,6 +15,13 @@ import { createBudget, updateBudget, getBudget } from '../budget.repository';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { COLORS, SHADOWS } from '../../../theme';
 
+const STATUS_OPTIONS = [
+    { label: '🟡  Em Análise', value: 'EM_ANALISE' },
+    { label: '🚀  Enviado', value: 'ENVIADO' },
+    { label: '✅  Aprovado', value: 'APROVADO' },
+    { label: '❌  Recusado', value: 'RECUSADO' },
+];
+
 export default function BudgetForm() {
     const navigation = useNavigation();
     const route = useRoute();
@@ -23,6 +30,7 @@ export default function BudgetForm() {
     const [title, setTitle] = useState('');
     const [client, setClient] = useState('');
     const [address, setAddress] = useState('');
+    const [status, setStatus] = useState<'EM_ANALISE' | 'ENVIADO' | 'APROVADO' | 'RECUSADO'>('EM_ANALISE');
     const [loading, setLoading] = useState(false);
 
     // Load existing budget data when editing
@@ -34,6 +42,7 @@ export default function BudgetForm() {
                     setTitle(budget.title);
                     setClient(budget.client_name);
                     setAddress(budget.address ?? '');
+                    setStatus(budget.status || 'EM_ANALISE');
                 }
                 setLoading(false);
             });
@@ -59,12 +68,14 @@ export default function BudgetForm() {
                     title: title.trim(),
                     client_name: client.trim(),
                     address: address.trim() || null,
+                    status,
                 });
             } else {
                 await createBudget({
                     title: title.trim(),
                     client_name: client.trim(),
                     address: address.trim() || undefined,
+                    status,
                 });
             }
             navigation.goBack();
@@ -130,6 +141,32 @@ export default function BudgetForm() {
                             style={styles.input}
                         />
                         <Text style={styles.inputHint}>Opcional</Text>
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Status</Text>
+                        <View style={styles.statusOptions}>
+                            {STATUS_OPTIONS.map((option) => (
+                                <Pressable
+                                    key={option.value}
+                                    onPress={() => setStatus(option.value as any)}
+                                    style={[
+                                        styles.statusOption,
+                                        status === option.value && styles.statusOptionSelected,
+                                    ]}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.statusOptionText,
+                                            status === option.value &&
+                                            styles.statusOptionTextSelected,
+                                        ]}
+                                    >
+                                        {option.label}
+                                    </Text>
+                                </Pressable>
+                            ))}
+                        </View>
                     </View>
                 </View>
 
@@ -208,6 +245,32 @@ const styles = StyleSheet.create({
         color: COLORS.textSecondary,
         marginTop: 4,
         marginLeft: 4,
+    },
+
+    // Status Selector
+    statusOptions: {
+        gap: 8,
+    },
+    statusOption: {
+        backgroundColor: COLORS.background,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+    },
+    statusOptionSelected: {
+        backgroundColor: '#E8F8F0',
+        borderColor: COLORS.primary,
+    },
+    statusOptionText: {
+        fontSize: 14,
+        color: COLORS.textPrimary,
+        fontWeight: '500',
+    },
+    statusOptionTextSelected: {
+        color: COLORS.primary,
+        fontWeight: '700',
     },
 
     // Save Button

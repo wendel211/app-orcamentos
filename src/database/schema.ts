@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS budgets (
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL,
   deleted_at TEXT,
+  status TEXT DEFAULT 'EM_ANALISE',
   synced INTEGER DEFAULT 0
 );
 

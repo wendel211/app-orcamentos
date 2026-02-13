@@ -6,6 +6,7 @@ export async function createBudget(data: {
     title: string;
     client_name: string;
     address?: string;
+    status?: 'EM_ANALISE' | 'ENVIADO' | 'APROVADO' | 'RECUSADO';
 }) {
     const db = getDatabase();
     const now = new Date().toISOString();
@@ -14,8 +15,8 @@ export async function createBudget(data: {
 
     await db.runAsync(
         `INSERT INTO budgets 
-     (id,title,client_name,address,discount,extra_fee,created_at,updated_at,synced)
-     VALUES (?,?,?,?,?,?,?,?,0)`,
+     (id,title,client_name,address,discount,extra_fee,created_at,updated_at,synced,status)
+     VALUES (?,?,?,?,?,?,?,?,0,?)`,
         [
             id,
             data.title,
@@ -24,7 +25,8 @@ export async function createBudget(data: {
             0,
             0,
             now,
-            now
+            now,
+            data.status ?? 'EM_ANALISE'
         ]
     );
 
@@ -39,6 +41,7 @@ export async function updateBudget(
         address?: string | null;
         discount?: number;
         extra_fee?: number;
+        status?: 'EM_ANALISE' | 'ENVIADO' | 'APROVADO' | 'RECUSADO';
     }
 ) {
     const db = getDatabase();
@@ -51,6 +54,7 @@ export async function updateBudget(
           address = ?,
           discount = COALESCE(?, discount),
           extra_fee = COALESCE(?, extra_fee),
+          status = COALESCE(?, status),
           updated_at = ?,
           synced = 0
         WHERE id = ?`,
@@ -60,6 +64,7 @@ export async function updateBudget(
             data.address ?? null,
             data.discount ?? null,
             data.extra_fee ?? null,
+            data.status ?? null,
             now,
             id
         ]

@@ -66,6 +66,19 @@ export default function BudgetDetails() {
         });
     }
 
+    function getStatusBadge(status: string) {
+        switch (status) {
+            case 'APROVADO':
+                return { label: 'Aprovado', bg: '#E8F8F0', color: COLORS.success, icon: '✅' };
+            case 'RECUSADO':
+                return { label: 'Recusado', bg: '#FDECEC', color: '#E74C3C', icon: '❌' };
+            case 'ENVIADO':
+                return { label: 'Enviado', bg: '#EBF5FB', color: '#3498DB', icon: '🚀' };
+            default:
+                return { label: 'Em Análise', bg: '#FEF9E7', color: '#F1C40F', icon: '🟡' };
+        }
+    }
+
     if (!budget) {
         return (
             <View style={styles.loadingContainer}>
@@ -74,15 +87,31 @@ export default function BudgetDetails() {
         );
     }
 
+    const statusStyle = getStatusBadge(budget.status || 'EM_ANALISE');
+
     return (
         <ScrollView
             style={styles.container}
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
         >
+            {/* Status Sync Indicator (Small) */}
+            <View style={styles.syncIndicator}>
+                <Text style={styles.syncText}>
+                    {budget.synced ? '☁️ Salvo na nuvem' : '⏳ Pendente de envio'}
+                </Text>
+            </View>
+
             {/* Main Info Card */}
             <View style={styles.card}>
-                <Text style={styles.cardTitle}>📋 Informações</Text>
+                <View style={[styles.headerRow, { borderBottomColor: statusStyle.bg, borderBottomWidth: 0 }]}>
+                    <Text style={styles.cardTitle}>📋 Informações</Text>
+                    <View style={[styles.statusBadge, { backgroundColor: statusStyle.bg }]}>
+                        <Text style={[styles.statusBadgeText, { color: statusStyle.color }]}>
+                            {statusStyle.icon} {statusStyle.label}
+                        </Text>
+                    </View>
+                </View>
 
                 <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>Título</Text>
@@ -107,9 +136,9 @@ export default function BudgetDetails() {
                 ) : null}
             </View>
 
-            {/* Date & Status Card */}
+            {/* Dates Card */}
             <View style={styles.card}>
-                <Text style={styles.cardTitle}>📅 Datas e Status</Text>
+                <Text style={styles.cardTitle}>📅 Datas</Text>
 
                 <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>Criado em</Text>
@@ -125,44 +154,6 @@ export default function BudgetDetails() {
                     <Text style={styles.infoValue}>
                         {formatDate(budget.updated_at)}
                     </Text>
-                </View>
-
-                <View style={styles.divider} />
-
-                <View style={styles.statusContainer}>
-                    <View
-                        style={[
-                            styles.statusBadge,
-                            {
-                                backgroundColor: budget.synced
-                                    ? '#E8F8F0'
-                                    : '#FEF3E2',
-                            },
-                        ]}
-                    >
-                        <View
-                            style={[
-                                styles.statusDot,
-                                {
-                                    backgroundColor: budget.synced
-                                        ? COLORS.success
-                                        : COLORS.warning,
-                                },
-                            ]}
-                        />
-                        <Text
-                            style={[
-                                styles.statusLabel,
-                                {
-                                    color: budget.synced
-                                        ? COLORS.success
-                                        : COLORS.warning,
-                                },
-                            ]}
-                        >
-                            {budget.synced ? 'Sincronizado' : 'Pendente de sincronização'}
-                        </Text>
-                    </View>
                 </View>
             </View>
 
@@ -210,6 +201,20 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.background,
     },
 
+    // Sync Indicator
+    syncIndicator: {
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    syncText: {
+        fontSize: 12,
+        color: COLORS.textSecondary,
+        backgroundColor: '#E8ECEF',
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderRadius: 12,
+    },
+
     // Card
     card: {
         backgroundColor: COLORS.card,
@@ -218,11 +223,27 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         ...SHADOWS.card,
     },
+    headerRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
     cardTitle: {
         fontSize: 17,
         fontWeight: '700',
         color: COLORS.textPrimary,
-        marginBottom: 16,
+    },
+
+    // Status Badge
+    statusBadge: {
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 8,
+    },
+    statusBadgeText: {
+        fontSize: 12,
+        fontWeight: '700',
     },
 
     // Info Rows
@@ -248,29 +269,6 @@ const styles = StyleSheet.create({
         height: 1,
         backgroundColor: COLORS.border,
         marginVertical: 4,
-    },
-
-    // Status
-    statusContainer: {
-        marginTop: 8,
-    },
-    statusBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        alignSelf: 'flex-start',
-        paddingHorizontal: 14,
-        paddingVertical: 8,
-        borderRadius: 20,
-        gap: 8,
-    },
-    statusDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-    },
-    statusLabel: {
-        fontSize: 14,
-        fontWeight: '600',
     },
 
     // Actions

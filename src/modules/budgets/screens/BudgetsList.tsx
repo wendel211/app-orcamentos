@@ -16,33 +16,28 @@ import { COLORS, SHADOWS } from '../../../theme';
 export default function BudgetsList() {
     const navigation = useNavigation();
     const [data, setData] = useState<any[]>([]);
-    const [syncing, setSyncing] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
 
     const load = async () => {
         const result = await listBudgets();
         setData(result);
     };
 
-    const handleSync = async () => {
-        setSyncing(true);
-        const result = await syncData();
-        setSyncing(false);
-
-        if (result.success) {
-            Alert.alert('Sucesso', 'Sincronização concluída!');
-            load();
-        } else {
-            Alert.alert('Erro', 'Falha ao sincronizar. Verifique sua conexão.');
-        }
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        // Sync in background on refresh
+        await syncData();
+        await load();
+        setRefreshing(false);
     };
 
     useFocusEffect(
         useCallback(() => {
             load();
+            // Trigger background sync when screen is focused
+            syncData().then(() => load());
         }, [])
     );
-
-    const syncedCount = data.filter((b) => b.synced).length;
 
     function formatDate(dateStr: string): string {
         const date = new Date(dateStr);
@@ -51,6 +46,19 @@ export default function BudgetsList() {
             month: '2-digit',
             year: 'numeric',
         });
+    }
+
+    function getStatusBadge(status: string) {
+        switch (status) {
+            case 'APROVADO':
+                return { label: 'Aprovado', bg: '#E8F8F0', color: COLORS.success, icon: '✅' };
+            case 'RECUSADO':
+                return { label: 'Recusado', bg: '#FDECEC', color: '#E74C3C', icon: '❌' };
+            case 'ENVIADO':
+                return { label: 'Enviado', bg: '#EBF5FB', color: '#3498DB', icon: '🚀' };
+            default:
+                return { label: 'Em Análise', bg: '#FEF9E7', color: '#F1C40F', icon: '🟡' };
+        }
     }
 
     return (
@@ -66,16 +74,16 @@ export default function BudgetsList() {
                     <View style={styles.summaryDivider} />
                     <View style={styles.summaryItem}>
                         <Text style={[styles.summaryNumber, { color: COLORS.success }]}>
-                            {syncedCount}
+                            {data.filter(b => b.status === 'APROVADO').length}
                         </Text>
-                        <Text style={styles.summaryLabel}>Sincronizados</Text>
+                        <Text style={styles.summaryLabel}>Aprovados</Text>
                     </View>
                     <View style={styles.summaryDivider} />
                     <View style={styles.summaryItem}>
-                        <Text style={[styles.summaryNumber, { color: COLORS.warning }]}>
-                            {data.length - syncedCount}
+                        <Text style={[styles.summaryNumber, { color: '#F1C40F' }]}>
+                            {data.filter(b => b.status === 'EM_ANALISE' || !b.status).length}
                         </Text>
-                        <Text style={styles.summaryLabel}>Pendentes</Text>
+                        <Text style={styles.summaryLabel}>Em Análise</Text>
                     </View>
                 </View>
             </View>
@@ -91,22 +99,6 @@ export default function BudgetsList() {
                 >
                     <Text style={styles.btnPrimaryText}>＋  Novo Orçamento</Text>
                 </Pressable>
-
-                <Pressable
-                    onPress={handleSync}
-                    disabled={syncing}
-                    style={({ pressed }) => [
-                        styles.btnOutline,
-                        pressed && { opacity: 0.85 },
-                        syncing && { opacity: 0.6 },
-                    ]}
-                >
-                    {syncing ? (
-                        <ActivityIndicator color={COLORS.primary} size="small" />
-                    ) : (
-                        <Text style={styles.btnOutlineText}>☁️  Sincronizar</Text>
-                    )}
-                </Pressable>
             </View>
 
             {/* Budget List */}
@@ -115,6 +107,8 @@ export default function BudgetsList() {
                 keyExtractor={(item) => item.id}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 20 }}
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                         <Text style={styles.emptyIcon}>📋</Text>
@@ -126,67 +120,53 @@ export default function BudgetsList() {
                         </Text>
                     </View>
                 }
-                renderItem={({ item }) => (
-                    <Pressable
-                        onPress={() =>
-                            (navigation as any).navigate('BudgetDetails', {
-                                id: item.id,
-                            })
-                        }
-                        style={({ pressed }) => [
-                            styles.budgetCard,
-                            pressed && { transform: [{ scale: 0.98 }] },
-                        ]}
-                    >
-                        <View style={styles.budgetCardTop}>
-                            <View style={styles.budgetCardLeft}>
-                                <View
-                                    style={[
-                                        styles.statusDot,
-                                        {
-                                            backgroundColor: item.synced
-                                                ? COLORS.success
-                                                : COLORS.warning,
-                                        },
-                                    ]}
-                                />
+                renderItem={({ item }) => {
+                    const status = getStatusBadge(item.status);
+                    return (
+                        <Pressable
+                            onPress={() =>
+                                (navigation as any).navigate('BudgetDetails', {
+                                    id: item.id,
+                                })
+                            }
+                            style={({ pressed }) => [
+                                styles.budgetCard,
+                                pressed && { transform: [{ scale: 0.98 }] },
+                            ]}
+                        >
+                            <View style={styles.budgetCardTop}>
                                 <View style={styles.budgetInfo}>
                                     <Text style={styles.budgetTitle}>{item.title}</Text>
-                                    <Text style={styles.budgetClient}>
-                                        {item.client_name}
-                                    </Text>
+                                    <View style={styles.clientRow}>
+                                        <Text style={styles.userIcon}>👤</Text>
+                                        <Text style={styles.budgetClient}>
+                                            {item.client_name}
+                                        </Text>
+                                    </View>
+                                </View>
+                                <View style={styles.budgetCardRight}>
+                                    <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
+                                        <Text style={[styles.statusText, { color: status.color }]}>
+                                            {status.icon} {status.label}
+                                        </Text>
+                                    </View>
                                 </View>
                             </View>
-                            <View style={styles.budgetCardRight}>
-                                <Text
-                                    style={[
-                                        styles.statusText,
-                                        {
-                                            color: item.synced
-                                                ? COLORS.success
-                                                : COLORS.warning,
-                                        },
-                                    ]}
-                                >
-                                    {item.synced ? 'Sincronizado' : 'Pendente'}
-                                </Text>
-                                <Text style={styles.chevron}>›</Text>
-                            </View>
-                        </View>
 
-                        {/* Bottom row: date + address */}
-                        <View style={styles.budgetCardBottom}>
-                            <Text style={styles.budgetMeta}>
-                                📅 {formatDate(item.created_at)}
-                            </Text>
-                            {item.address ? (
-                                <Text style={styles.budgetMeta} numberOfLines={1}>
-                                    📍 {item.address}
+                            {/* Bottom row: date + address */}
+                            <View style={styles.budgetCardBottom}>
+                                <Text style={styles.budgetMeta}>
+                                    📅 {formatDate(item.created_at)}
                                 </Text>
-                            ) : null}
-                        </View>
-                    </Pressable>
-                )}
+                                {item.address ? (
+                                    <Text style={styles.budgetMeta} numberOfLines={1}>
+                                        📍 {item.address}
+                                    </Text>
+                                ) : null}
+                            </View>
+                        </Pressable>
+                    );
+                }}
             />
         </View>
     );
@@ -258,21 +238,6 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         fontSize: 15,
     },
-    btnOutline: {
-        flex: 1,
-        backgroundColor: COLORS.card,
-        paddingVertical: 14,
-        borderRadius: 12,
-        borderWidth: 1.5,
-        borderColor: COLORS.primary,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    btnOutlineText: {
-        color: COLORS.primary,
-        fontWeight: '700',
-        fontSize: 15,
-    },
 
     // Empty State
     emptyContainer: {
@@ -304,53 +269,49 @@ const styles = StyleSheet.create({
     },
     budgetCardTop: {
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'space-between',
-    },
-    budgetCardLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flex: 1,
-    },
-    statusDot: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        marginRight: 12,
+        marginBottom: 12,
     },
     budgetInfo: {
         flex: 1,
+        marginRight: 10,
     },
     budgetTitle: {
         fontSize: 16,
         fontWeight: '700',
         color: COLORS.textPrimary,
-        marginBottom: 2,
+        marginBottom: 6,
+    },
+    clientRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+    userIcon: {
+        fontSize: 14,
     },
     budgetClient: {
         fontSize: 14,
         color: COLORS.textSecondary,
     },
     budgetCardRight: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
+        alignItems: 'flex-end',
+    },
+    statusBadge: {
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 8,
     },
     statusText: {
         fontSize: 12,
-        fontWeight: '600',
-    },
-    chevron: {
-        fontSize: 22,
-        color: COLORS.textSecondary,
-        fontWeight: '300',
+        fontWeight: '700',
     },
 
     // Bottom row for date/address
     budgetCardBottom: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: 10,
         paddingTop: 10,
         borderTopWidth: 1,
         borderTopColor: COLORS.border,
