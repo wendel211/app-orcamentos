@@ -1,17 +1,70 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { useRoute } from '@react-navigation/native';
-import { getBudget } from '../budget.repository';
+import React, { useCallback, useState } from 'react';
+import {
+    View,
+    Text,
+    ScrollView,
+    Pressable,
+    Alert,
+    ActivityIndicator,
+    StyleSheet,
+} from 'react-native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import { getBudget, deleteBudget } from '../budget.repository';
 import { COLORS, SHADOWS } from '../../../theme';
 
 export default function BudgetDetails() {
+    const navigation = useNavigation();
     const route = useRoute();
     const { id } = route.params as any;
     const [budget, setBudget] = useState<any>(null);
 
-    useEffect(() => {
-        getBudget(id).then(setBudget);
-    }, []);
+    const load = async () => {
+        const result = await getBudget(id);
+        setBudget(result);
+    };
+
+    useFocusEffect(
+        useCallback(() => {
+            load();
+        }, [id])
+    );
+
+    function handleEdit() {
+        (navigation as any).navigate('BudgetForm', { id: budget.id });
+    }
+
+    function handleDelete() {
+        Alert.alert(
+            'Excluir Orçamento',
+            `Tem certeza que deseja excluir "${budget.title}"?\n\nEsta ação não pode ser desfeita.`,
+            [
+                { text: 'Cancelar', style: 'cancel' },
+                {
+                    text: 'Excluir',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await deleteBudget(budget.id);
+                            navigation.goBack();
+                        } catch (error) {
+                            Alert.alert('Erro', 'Não foi possível excluir o orçamento.');
+                        }
+                    },
+                },
+            ]
+        );
+    }
+
+    function formatDate(dateStr: string): string {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    }
 
     if (!budget) {
         return (
@@ -22,7 +75,11 @@ export default function BudgetDetails() {
     }
 
     return (
-        <View style={styles.container}>
+        <ScrollView
+            style={styles.container}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+        >
             {/* Main Info Card */}
             <View style={styles.card}>
                 <Text style={styles.cardTitle}>📋 Informações</Text>
@@ -43,16 +100,34 @@ export default function BudgetDetails() {
                     <>
                         <View style={styles.divider} />
                         <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Endereço</Text>
+                            <Text style={styles.infoLabel}>📍 Endereço</Text>
                             <Text style={styles.infoValue}>{budget.address}</Text>
                         </View>
                     </>
                 ) : null}
             </View>
 
-            {/* Status Card */}
+            {/* Date & Status Card */}
             <View style={styles.card}>
-                <Text style={styles.cardTitle}>📡 Status</Text>
+                <Text style={styles.cardTitle}>📅 Datas e Status</Text>
+
+                <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Criado em</Text>
+                    <Text style={styles.infoValue}>
+                        {formatDate(budget.created_at)}
+                    </Text>
+                </View>
+
+                <View style={styles.divider} />
+
+                <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Atualizado em</Text>
+                    <Text style={styles.infoValue}>
+                        {formatDate(budget.updated_at)}
+                    </Text>
+                </View>
+
+                <View style={styles.divider} />
 
                 <View style={styles.statusContainer}>
                     <View
@@ -89,20 +164,33 @@ export default function BudgetDetails() {
                         </Text>
                     </View>
                 </View>
-
-                {budget.created_at ? (
-                    <>
-                        <View style={styles.divider} />
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Criado em</Text>
-                            <Text style={styles.infoValue}>
-                                {new Date(budget.created_at).toLocaleDateString('pt-BR')}
-                            </Text>
-                        </View>
-                    </>
-                ) : null}
             </View>
-        </View>
+
+            {/* Action Buttons */}
+            <View style={styles.actionsCard}>
+                <Pressable
+                    onPress={handleEdit}
+                    style={({ pressed }) => [
+                        styles.actionBtn,
+                        styles.editBtn,
+                        pressed && { opacity: 0.85 },
+                    ]}
+                >
+                    <Text style={styles.editBtnText}>✏️  Editar Orçamento</Text>
+                </Pressable>
+
+                <Pressable
+                    onPress={handleDelete}
+                    style={({ pressed }) => [
+                        styles.actionBtn,
+                        styles.deleteBtn,
+                        pressed && { opacity: 0.85 },
+                    ]}
+                >
+                    <Text style={styles.deleteBtnText}>🗑  Excluir Orçamento</Text>
+                </Pressable>
+            </View>
+        </ScrollView>
     );
 }
 
@@ -110,7 +198,10 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: COLORS.background,
+    },
+    scrollContent: {
         padding: 16,
+        paddingBottom: 40,
     },
     loadingContainer: {
         flex: 1,
@@ -161,7 +252,7 @@ const styles = StyleSheet.create({
 
     // Status
     statusContainer: {
-        marginBottom: 8,
+        marginTop: 8,
     },
     statusBadge: {
         flexDirection: 'row',
@@ -180,5 +271,35 @@ const styles = StyleSheet.create({
     statusLabel: {
         fontSize: 14,
         fontWeight: '600',
+    },
+
+    // Actions
+    actionsCard: {
+        gap: 12,
+        marginBottom: 16,
+    },
+    actionBtn: {
+        paddingVertical: 16,
+        borderRadius: 14,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    editBtn: {
+        backgroundColor: COLORS.primary,
+    },
+    editBtnText: {
+        color: COLORS.white,
+        fontWeight: '700',
+        fontSize: 16,
+    },
+    deleteBtn: {
+        backgroundColor: COLORS.card,
+        borderWidth: 1.5,
+        borderColor: '#E74C3C',
+    },
+    deleteBtnText: {
+        color: '#E74C3C',
+        fontWeight: '700',
+        fontSize: 16,
     },
 });

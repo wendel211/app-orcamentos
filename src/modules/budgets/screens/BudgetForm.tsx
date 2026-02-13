@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -8,28 +8,80 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
+    Alert,
+    ActivityIndicator,
 } from 'react-native';
-import { createBudget } from '../budget.repository';
-import { useNavigation } from '@react-navigation/native';
+import { createBudget, updateBudget, getBudget } from '../budget.repository';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { COLORS, SHADOWS } from '../../../theme';
 
 export default function BudgetForm() {
     const navigation = useNavigation();
+    const route = useRoute();
+    const editId = (route.params as any)?.id as string | undefined;
+
     const [title, setTitle] = useState('');
     const [client, setClient] = useState('');
+    const [address, setAddress] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    // Load existing budget data when editing
+    useEffect(() => {
+        if (editId) {
+            setLoading(true);
+            getBudget(editId).then((budget) => {
+                if (budget) {
+                    setTitle(budget.title);
+                    setClient(budget.client_name);
+                    setAddress(budget.address ?? '');
+                }
+                setLoading(false);
+            });
+        }
+    }, [editId]);
+
+    // Update header title
+    useEffect(() => {
+        navigation.setOptions({
+            title: editId ? 'Editar Orçamento' : 'Novo Orçamento',
+        });
+    }, [editId]);
 
     async function handleSave() {
-        if (!title || !client) return;
+        if (!title.trim() || !client.trim()) {
+            Alert.alert('Atenção', 'Preencha o título e o nome do cliente.');
+            return;
+        }
 
-        await createBudget({
-            title,
-            client_name: client,
-        });
-
-        navigation.goBack();
+        try {
+            if (editId) {
+                await updateBudget(editId, {
+                    title: title.trim(),
+                    client_name: client.trim(),
+                    address: address.trim() || null,
+                });
+            } else {
+                await createBudget({
+                    title: title.trim(),
+                    client_name: client.trim(),
+                    address: address.trim() || undefined,
+                });
+            }
+            navigation.goBack();
+        } catch (error) {
+            Alert.alert('Erro', 'Não foi possível salvar o orçamento.');
+        }
     }
 
     const isValid = title.trim().length > 0 && client.trim().length > 0;
+
+    if (loading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+            </View>
+        );
+    }
 
     return (
         <KeyboardAvoidingView
@@ -42,7 +94,9 @@ export default function BudgetForm() {
             >
                 {/* Form Card */}
                 <View style={styles.formCard}>
-                    <Text style={styles.formTitle}>📝 Dados do Orçamento</Text>
+                    <Text style={styles.formTitle}>
+                        {editId ? '✏️ Editar Orçamento' : '📝 Dados do Orçamento'}
+                    </Text>
 
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Título do orçamento</Text>
@@ -65,6 +119,18 @@ export default function BudgetForm() {
                             style={styles.input}
                         />
                     </View>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Endereço da obra</Text>
+                        <TextInput
+                            value={address}
+                            onChangeText={setAddress}
+                            placeholder="Ex: Rua das Flores, 123"
+                            placeholderTextColor={COLORS.textSecondary}
+                            style={styles.input}
+                        />
+                        <Text style={styles.inputHint}>Opcional</Text>
+                    </View>
                 </View>
 
                 {/* Save Button */}
@@ -78,7 +144,7 @@ export default function BudgetForm() {
                     ]}
                 >
                     <Text style={styles.saveBtnText}>
-                        ✓  Salvar Orçamento
+                        {editId ? '✓  Salvar Alterações' : '✓  Salvar Orçamento'}
                     </Text>
                 </Pressable>
             </ScrollView>
@@ -89,6 +155,12 @@ export default function BudgetForm() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: COLORS.background,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
         backgroundColor: COLORS.background,
     },
     scrollContent: {
@@ -130,6 +202,12 @@ const styles = StyleSheet.create({
         paddingVertical: 14,
         fontSize: 16,
         color: COLORS.textPrimary,
+    },
+    inputHint: {
+        fontSize: 12,
+        color: COLORS.textSecondary,
+        marginTop: 4,
+        marginLeft: 4,
     },
 
     // Save Button

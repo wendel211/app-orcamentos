@@ -44,6 +44,15 @@ export default function BudgetsList() {
 
     const syncedCount = data.filter((b) => b.synced).length;
 
+    function formatDate(dateStr: string): string {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+        });
+    }
+
     return (
         <View style={styles.container}>
             {/* Summary Card */}
@@ -129,38 +138,52 @@ export default function BudgetsList() {
                             pressed && { transform: [{ scale: 0.98 }] },
                         ]}
                     >
-                        <View style={styles.budgetCardLeft}>
-                            <View
-                                style={[
-                                    styles.statusDot,
-                                    {
-                                        backgroundColor: item.synced
-                                            ? COLORS.success
-                                            : COLORS.warning,
-                                    },
-                                ]}
-                            />
-                            <View style={styles.budgetInfo}>
-                                <Text style={styles.budgetTitle}>{item.title}</Text>
-                                <Text style={styles.budgetClient}>
-                                    {item.client_name}
+                        <View style={styles.budgetCardTop}>
+                            <View style={styles.budgetCardLeft}>
+                                <View
+                                    style={[
+                                        styles.statusDot,
+                                        {
+                                            backgroundColor: item.synced
+                                                ? COLORS.success
+                                                : COLORS.warning,
+                                        },
+                                    ]}
+                                />
+                                <View style={styles.budgetInfo}>
+                                    <Text style={styles.budgetTitle}>{item.title}</Text>
+                                    <Text style={styles.budgetClient}>
+                                        {item.client_name}
+                                    </Text>
+                                </View>
+                            </View>
+                            <View style={styles.budgetCardRight}>
+                                <Text
+                                    style={[
+                                        styles.statusText,
+                                        {
+                                            color: item.synced
+                                                ? COLORS.success
+                                                : COLORS.warning,
+                                        },
+                                    ]}
+                                >
+                                    {item.synced ? 'Sincronizado' : 'Pendente'}
                                 </Text>
+                                <Text style={styles.chevron}>›</Text>
                             </View>
                         </View>
-                        <View style={styles.budgetCardRight}>
-                            <Text
-                                style={[
-                                    styles.statusText,
-                                    {
-                                        color: item.synced
-                                            ? COLORS.success
-                                            : COLORS.warning,
-                                    },
-                                ]}
-                            >
-                                {item.synced ? 'Sincronizado' : 'Pendente'}
+
+                        {/* Bottom row: date + address */}
+                        <View style={styles.budgetCardBottom}>
+                            <Text style={styles.budgetMeta}>
+                                📅 {formatDate(item.created_at)}
                             </Text>
-                            <Text style={styles.chevron}>›</Text>
+                            {item.address ? (
+                                <Text style={styles.budgetMeta} numberOfLines={1}>
+                                    📍 {item.address}
+                                </Text>
+                            ) : null}
                         </View>
                     </Pressable>
                 )}
@@ -277,10 +300,12 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         padding: 16,
         marginBottom: 10,
+        ...SHADOWS.card,
+    },
+    budgetCardTop: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        ...SHADOWS.card,
     },
     budgetCardLeft: {
         flexDirection: 'row',
@@ -319,5 +344,21 @@ const styles = StyleSheet.create({
         fontSize: 22,
         color: COLORS.textSecondary,
         fontWeight: '300',
+    },
+
+    // Bottom row for date/address
+    budgetCardBottom: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 10,
+        paddingTop: 10,
+        borderTopWidth: 1,
+        borderTopColor: COLORS.border,
+        gap: 12,
+    },
+    budgetMeta: {
+        fontSize: 12,
+        color: COLORS.textSecondary,
+        flexShrink: 1,
     },
 });

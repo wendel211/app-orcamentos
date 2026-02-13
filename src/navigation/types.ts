@@ -1,5 +1,5 @@
 export type RootStackParamList = {
-    Tabs: undefined;
-    BudgetForm: undefined;
+    BudgetsList: undefined;
+    BudgetForm: { id?: string } | undefined;
     BudgetDetails: { id: string };
 };
