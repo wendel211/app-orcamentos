@@ -10,16 +10,28 @@ import {
     ScrollView,
     Alert,
     ActivityIndicator,
+    SafeAreaView
 } from 'react-native';
 import { createBudget, updateBudget, getBudget } from '../budget.repository';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { COLORS, SHADOWS } from '../../../theme';
+import {
+    Check,
+    ChevronLeft,
+    FileText,
+    User,
+    MapPin,
+    Clock,
+    AlertCircle,
+    CheckCircle,
+    Send
+} from 'lucide-react-native';
 
 const STATUS_OPTIONS = [
-    { label: '🟡  Em Análise', value: 'EM_ANALISE' },
-    { label: '🚀  Enviado', value: 'ENVIADO' },
-    { label: '✅  Aprovado', value: 'APROVADO' },
-    { label: '❌  Recusado', value: 'RECUSADO' },
+    { label: 'Em Análise', value: 'EM_ANALISE', icon: Clock, color: '#92400E', bg: '#FEF3C7' },
+    { label: 'Enviado', value: 'ENVIADO', icon: Send, color: '#1E40AF', bg: '#DBEAFE' },
+    { label: 'Aprovado', value: 'APROVADO', icon: CheckCircle, color: '#166534', bg: '#DCFCE7' },
+    { label: 'Recusado', value: 'RECUSADO', icon: AlertCircle, color: '#991B1B', bg: '#FEE2E2' },
 ];
 
 export default function BudgetForm() {
@@ -47,13 +59,6 @@ export default function BudgetForm() {
                 setLoading(false);
             });
         }
-    }, [editId]);
-
-    // Update header title
-    useEffect(() => {
-        navigation.setOptions({
-            title: editId ? 'Editar Orçamento' : 'Novo Orçamento',
-        });
     }, [editId]);
 
     async function handleSave() {
@@ -95,97 +100,146 @@ export default function BudgetForm() {
     }
 
     return (
-        <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
-            <ScrollView
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
+        <SafeAreaView style={styles.container}>
+            <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             >
-                {/* Form Card */}
-                <View style={styles.formCard}>
-                    <Text style={styles.formTitle}>
-                        {editId ? '✏️ Editar Orçamento' : '📝 Dados do Orçamento'}
+                {/* Modern Header */}
+                <View style={styles.header}>
+                    <Pressable
+                        onPress={() => navigation.goBack()}
+                        style={({ pressed }) => [
+                            styles.backButton,
+                            pressed && { backgroundColor: '#F1F5F9' }
+                        ]}
+                    >
+                        <ChevronLeft size={28} color={COLORS.primary} strokeWidth={2.5} />
+                    </Pressable>
+                    <Text style={styles.headerTitle}>
+                        {editId ? 'Editar Orçamento' : 'Novo Orçamento'}
                     </Text>
-
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Título do orçamento</Text>
-                        <TextInput
-                            value={title}
-                            onChangeText={setTitle}
-                            placeholder="Ex: Reforma cozinha"
-                            placeholderTextColor={COLORS.textSecondary}
-                            style={styles.input}
-                        />
-                    </View>
-
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Nome do cliente</Text>
-                        <TextInput
-                            value={client}
-                            onChangeText={setClient}
-                            placeholder="Ex: João da Silva"
-                            placeholderTextColor={COLORS.textSecondary}
-                            style={styles.input}
-                        />
-                    </View>
-
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Endereço da obra</Text>
-                        <TextInput
-                            value={address}
-                            onChangeText={setAddress}
-                            placeholder="Ex: Rua das Flores, 123"
-                            placeholderTextColor={COLORS.textSecondary}
-                            style={styles.input}
-                        />
-                        <Text style={styles.inputHint}>Opcional</Text>
-                    </View>
-
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Status</Text>
-                        <View style={styles.statusOptions}>
-                            {STATUS_OPTIONS.map((option) => (
-                                <Pressable
-                                    key={option.value}
-                                    onPress={() => setStatus(option.value as any)}
-                                    style={[
-                                        styles.statusOption,
-                                        status === option.value && styles.statusOptionSelected,
-                                    ]}
-                                >
-                                    <Text
-                                        style={[
-                                            styles.statusOptionText,
-                                            status === option.value &&
-                                            styles.statusOptionTextSelected,
-                                        ]}
-                                    >
-                                        {option.label}
-                                    </Text>
-                                </Pressable>
-                            ))}
-                        </View>
-                    </View>
+                    <View style={{ width: 44 }} />
                 </View>
 
-                {/* Save Button */}
-                <Pressable
-                    onPress={handleSave}
-                    disabled={!isValid}
-                    style={({ pressed }) => [
-                        styles.saveBtn,
-                        !isValid && styles.saveBtnDisabled,
-                        pressed && isValid && { opacity: 0.85 },
-                    ]}
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
                 >
-                    <Text style={styles.saveBtnText}>
-                        {editId ? '✓  Salvar Alterações' : '✓  Salvar Orçamento'}
-                    </Text>
-                </Pressable>
-            </ScrollView>
-        </KeyboardAvoidingView>
+                    {/* Form Card */}
+                    <View style={styles.card}>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>TÍTULO DO ORÇAMENTO</Text>
+                            <View style={styles.inputWrapper}>
+                                <FileText size={20} color={COLORS.primary} style={styles.inputIcon} />
+                                <TextInput
+                                    value={title}
+                                    onChangeText={setTitle}
+                                    placeholder="Ex: Reforma Cozinha"
+                                    placeholderTextColor={COLORS.textSecondary}
+                                    style={styles.input}
+                                />
+                            </View>
+                        </View>
+
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>NOME DO CLIENTE</Text>
+                            <View style={styles.inputWrapper}>
+                                <User size={20} color={COLORS.primary} style={styles.inputIcon} />
+                                <TextInput
+                                    value={client}
+                                    onChangeText={setClient}
+                                    placeholder="Ex: Maria Silva"
+                                    placeholderTextColor={COLORS.textSecondary}
+                                    style={styles.input}
+                                />
+                            </View>
+                        </View>
+
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>ENDEREÇO (Opcional)</Text>
+                            <View style={styles.inputWrapper}>
+                                <MapPin size={20} color={COLORS.primary} style={styles.inputIcon} />
+                                <TextInput
+                                    value={address}
+                                    onChangeText={setAddress}
+                                    placeholder="Ex: Av. Paulista, 1000"
+                                    placeholderTextColor={COLORS.textSecondary}
+                                    style={styles.input}
+                                />
+                            </View>
+                        </View>
+                    </View>
+
+                    {/* Status Card */}
+                    <View style={styles.card}>
+                        <Text style={styles.sectionTitle}>STATUS</Text>
+                        <View style={styles.statusGrid}>
+                            {STATUS_OPTIONS.map((option) => {
+                                const Icon = option.icon;
+                                const isSelected = status === option.value;
+                                return (
+                                    <Pressable
+                                        key={option.value}
+                                        onPress={() => setStatus(option.value as any)}
+                                        style={[
+                                            styles.statusCard,
+                                            isSelected && {
+                                                backgroundColor: option.bg,
+                                                borderColor: option.color,
+                                                borderWidth: 2,
+                                            },
+                                        ]}
+                                    >
+                                        <View style={[
+                                            styles.iconBox,
+                                            { backgroundColor: isSelected ? COLORS.white : '#F1F5F9' }
+                                        ]}>
+                                            <Icon
+                                                size={20}
+                                                color={isSelected ? option.color : COLORS.textSecondary}
+                                            />
+                                        </View>
+                                        <Text
+                                            style={[
+                                                styles.statusLabel,
+                                                isSelected && {
+                                                    color: option.color,
+                                                    fontWeight: '700'
+                                                },
+                                            ]}
+                                        >
+                                            {option.label}
+                                        </Text>
+                                        {isSelected && (
+                                            <View style={styles.checkBadge}>
+                                                <Check size={12} color={COLORS.white} strokeWidth={4} />
+                                            </View>
+                                        )}
+                                    </Pressable>
+                                );
+                            })}
+                        </View>
+                    </View>
+
+                    {/* Save Button */}
+                    <Pressable
+                        onPress={handleSave}
+                        disabled={!isValid}
+                        style={({ pressed }) => [
+                            styles.saveBtn,
+                            !isValid && styles.saveBtnDisabled,
+                            pressed && isValid && { opacity: 0.9, transform: [{ scale: 0.98 }] },
+                        ]}
+                    >
+                        <Check size={24} color={COLORS.white} strokeWidth={3} />
+                        <Text style={styles.saveBtnText}>
+                            Salvar Orçamento
+                        </Text>
+                    </Pressable>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </SafeAreaView>
     );
 }
 
@@ -193,6 +247,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: COLORS.background,
+        paddingTop: Platform.OS === 'android' ? 40 : 0,
     },
     loadingContainer: {
         flex: 1,
@@ -200,24 +255,50 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: COLORS.background,
     },
+
+    // Header
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+    },
+    backButton: {
+        width: 44,
+        height: 44,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: COLORS.card,
+        ...SHADOWS.card,
+        shadowOpacity: 0.05,
+    },
+    headerTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: COLORS.textPrimary,
+    },
+
     scrollContent: {
-        padding: 16,
+        padding: 20,
         paddingBottom: 40,
     },
 
-    // Form Card
-    formCard: {
+    // Card
+    card: {
         backgroundColor: COLORS.card,
-        borderRadius: 16,
+        borderRadius: 20,
         padding: 24,
         marginBottom: 24,
         ...SHADOWS.card,
     },
-    formTitle: {
-        fontSize: 18,
+    sectionTitle: {
+        fontSize: 14,
         fontWeight: '700',
-        color: COLORS.textPrimary,
-        marginBottom: 24,
+        color: COLORS.textSecondary,
+        marginBottom: 16,
+        letterSpacing: 1,
     },
 
     // Inputs
@@ -225,68 +306,91 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     label: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: COLORS.textPrimary,
+        fontSize: 11,
+        fontWeight: '800',
+        color: COLORS.primary, // Blue label
         marginBottom: 8,
+        letterSpacing: 0.5,
+    },
+    inputWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F8FAFC',
+        borderBottomWidth: 2,
+        borderBottomColor: COLORS.border,
+        paddingHorizontal: 4,
+        height: 50,
+    },
+    inputIcon: {
+        marginRight: 12,
     },
     input: {
-        backgroundColor: COLORS.background,
-        borderWidth: 1,
-        borderColor: COLORS.border,
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 14,
+        flex: 1,
         fontSize: 16,
         color: COLORS.textPrimary,
-    },
-    inputHint: {
-        fontSize: 12,
-        color: COLORS.textSecondary,
-        marginTop: 4,
-        marginLeft: 4,
+        fontWeight: '600',
     },
 
-    // Status Selector
-    statusOptions: {
-        gap: 8,
+    // Status Grid
+    statusGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 12,
     },
-    statusOption: {
-        backgroundColor: COLORS.background,
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        borderRadius: 10,
+    statusCard: {
+        width: '48%',
+        backgroundColor: '#F8FAFC',
+        padding: 16,
+        borderRadius: 16,
+        alignItems: 'center',
         borderWidth: 1,
         borderColor: COLORS.border,
+        justifyContent: 'center',
+        position: 'relative',
     },
-    statusOptionSelected: {
-        backgroundColor: '#E8F8F0',
-        borderColor: COLORS.primary,
+    iconBox: {
+        width: 40,
+        height: 40,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 8,
     },
-    statusOptionText: {
-        fontSize: 14,
-        color: COLORS.textPrimary,
-        fontWeight: '500',
+    statusLabel: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: COLORS.textSecondary,
     },
-    statusOptionTextSelected: {
-        color: COLORS.primary,
-        fontWeight: '700',
+    checkBadge: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        backgroundColor: COLORS.primary,
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 
     // Save Button
     saveBtn: {
+        flexDirection: 'row',
         backgroundColor: COLORS.primary,
-        paddingVertical: 16,
-        borderRadius: 14,
+        paddingVertical: 20,
+        borderRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
+        gap: 12,
+        ...SHADOWS.button,
     },
     saveBtnDisabled: {
         backgroundColor: COLORS.border,
+        shadowOpacity: 0,
     },
     saveBtnText: {
         color: COLORS.white,
         fontWeight: '700',
-        fontSize: 17,
+        fontSize: 18,
     },
 });

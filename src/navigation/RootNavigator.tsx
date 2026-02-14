@@ -30,17 +30,17 @@ export default function RootNavigator() {
                 <Stack.Screen
                     name="BudgetsList"
                     component={BudgetsList}
-                    options={{ title: 'Meus Orçamentos' }}
+                    options={{ headerShown: false }}
                 />
                 <Stack.Screen
                     name="BudgetForm"
                     component={BudgetForm}
-                    options={{ title: 'Novo Orçamento' }}
+                    options={{ headerShown: false }}
                 />
                 <Stack.Screen
                     name="BudgetDetails"
                     component={BudgetDetails}
-                    options={{ title: 'Detalhes' }}
+                    options={{ headerShown: false }}
                 />
             </Stack.Navigator>
         </NavigationContainer>
