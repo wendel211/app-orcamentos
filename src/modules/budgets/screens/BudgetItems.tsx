@@ -7,7 +7,6 @@ import {
     StyleSheet,
     SafeAreaView,
     Platform,
-    Alert,
     TextInput,
 } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -16,6 +15,7 @@ import { listItems, createItem, deleteItem } from '../../items/item.repository';
 import { updateBudget, getBudget } from '../budget.repository';
 import { Item, ItemType } from '../../items/item.types';
 import ItemFormModal from '../components/ItemFormModal';
+import ConfirmationModal from '../../../components/ConfirmationModal';
 import {
     ChevronLeft,
     Plus,
@@ -47,6 +47,7 @@ export default function BudgetItems() {
     const [discount, setDiscount] = useState('0');
     const [extraFee, setExtraFee] = useState('0');
     const [modalVisible, setModalVisible] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
 
     const load = async () => {
         const [loadedItems, budget] = await Promise.all([
@@ -72,18 +73,15 @@ export default function BudgetItems() {
         await load();
     }
 
-    async function handleDeleteItem(id: string) {
-        Alert.alert('Remover item', 'Deseja remover este item?', [
-            { text: 'Cancelar', style: 'cancel' },
-            {
-                text: 'Remover',
-                style: 'destructive',
-                onPress: async () => {
-                    await deleteItem(id);
-                    await load();
-                },
-            },
-        ]);
+    function handleDeleteItem(item: Item) {
+        setItemToDelete(item);
+    }
+
+    async function confirmDeleteItem() {
+        if (!itemToDelete) return;
+        await deleteItem(itemToDelete.id);
+        setItemToDelete(null);
+        await load();
     }
 
     async function handleSaveTotals() {
@@ -257,7 +255,7 @@ export default function BudgetItems() {
                                 </View>
                             </View>
                             <Pressable
-                                onPress={() => handleDeleteItem(item.id)}
+                                onPress={() => handleDeleteItem(item)}
                                 style={({ pressed }) => [styles.deleteBtn, pressed && { opacity: 0.7 }]}
                             >
                                 <Trash2 size={16} color={COLORS.error} />
@@ -271,6 +269,17 @@ export default function BudgetItems() {
                 visible={modalVisible}
                 onClose={() => setModalVisible(false)}
                 onSave={handleAddItem}
+            />
+
+            <ConfirmationModal
+                visible={!!itemToDelete}
+                title="Remover Item"
+                message={`Deseja remover "${itemToDelete?.name}" do orçamento? Essa ação não pode ser desfeita.`}
+                confirmText="Sim, remover"
+                cancelText="Cancelar"
+                onConfirm={confirmDeleteItem}
+                onCancel={() => setItemToDelete(null)}
+                type="danger"
             />
         </SafeAreaView>
     );
