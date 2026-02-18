@@ -45,7 +45,7 @@ export default function BudgetForm() {
     const [status, setStatus] = useState<'EM_ANALISE' | 'ENVIADO' | 'APROVADO' | 'RECUSADO'>('EM_ANALISE');
     const [loading, setLoading] = useState(false);
 
-    // Load existing budget data when editing
+    //  Load existing budget data when editing
     useEffect(() => {
         if (editId) {
             setLoading(true);

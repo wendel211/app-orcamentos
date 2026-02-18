@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { getBudget, deleteBudget } from '../budget.repository';
+import ConfirmationModal from '../../../components/ConfirmationModal';
 import { COLORS, SHADOWS } from '../../../theme';
 import {
     Edit2,
@@ -33,6 +34,7 @@ export default function BudgetDetails() {
     const route = useRoute();
     const { id } = route.params as any;
     const [budget, setBudget] = useState<any>(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const load = async () => {
         const result = await getBudget(id);
@@ -50,25 +52,18 @@ export default function BudgetDetails() {
     }
 
     function handleDelete() {
-        Alert.alert(
-            'Excluir',
-            `Deseja excluir "${budget.title}"?`,
-            [
-                { text: 'Não', style: 'cancel' },
-                {
-                    text: 'Sim, excluir',
-                    style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            await deleteBudget(budget.id);
-                            navigation.goBack();
-                        } catch (error) {
-                            Alert.alert('Erro', 'Falha ao excluir.');
-                        }
-                    },
-                },
-            ]
-        );
+        setShowDeleteModal(true);
+    }
+
+    async function confirmDelete() {
+        try {
+            await deleteBudget(budget.id);
+            setShowDeleteModal(false);
+            navigation.goBack();
+        } catch (error) {
+            setShowDeleteModal(false);
+            Alert.alert('Erro', 'Falha ao excluir.');
+        }
     }
 
     function formatDate(dateStr: string): string {
@@ -221,7 +216,18 @@ export default function BudgetDetails() {
                     </Pressable>
                 </View>
             </ScrollView>
-        </SafeAreaView>
+
+            <ConfirmationModal
+                visible={showDeleteModal}
+                title="Excluir Orçamento"
+                message={`Tem certeza que deseja excluir o orçamento "${budget?.title}"? Essa ação não pode ser desfeita.`}
+                confirmText="Sim, excluir"
+                cancelText="Cancelar"
+                onConfirm={confirmDelete}
+                onCancel={() => setShowDeleteModal(false)}
+                type="danger"
+            />
+        </SafeAreaView >
     );
 }
 
