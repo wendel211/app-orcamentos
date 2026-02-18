@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { getBudget, deleteBudget } from '../budget.repository';
+import { listItems } from '../../items/item.repository';
 import ConfirmationModal from '../../../components/ConfirmationModal';
 import { COLORS, SHADOWS } from '../../../theme';
 import {
@@ -26,7 +27,9 @@ import {
     CloudOff,
     AlertCircle,
     Send,
-    ChevronLeft
+    ChevronLeft,
+    Calculator,
+    ChevronRight
 } from 'lucide-react-native';
 
 export default function BudgetDetails() {
@@ -35,10 +38,18 @@ export default function BudgetDetails() {
     const { id } = route.params as any;
     const [budget, setBudget] = useState<any>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [itemsTotal, setItemsTotal] = useState(0);
+    const [itemsCount, setItemsCount] = useState(0);
 
     const load = async () => {
         const result = await getBudget(id);
         setBudget(result);
+        const items = await listItems(id);
+        const subtotal = items.reduce((s, i) => s + i.qty * i.unit_price, 0);
+        const discount = result?.discount ?? 0;
+        const extraFee = result?.extra_fee ?? 0;
+        setItemsTotal(subtotal - discount + extraFee);
+        setItemsCount(items.length);
     };
 
     useFocusEffect(
@@ -188,6 +199,31 @@ export default function BudgetDetails() {
                         </View>
                     </View>
                 </View>
+
+                {/* Items & Calculations Card */}
+                <Pressable
+                    onPress={() => (navigation as any).navigate('BudgetItems', { budgetId: budget.id })}
+                    style={({ pressed }) => [
+                        styles.itemsCard,
+                        pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
+                    ]}
+                >
+                    <View style={styles.itemsCardLeft}>
+                        <View style={styles.itemsIconBox}>
+                            <Calculator size={22} color={COLORS.primary} />
+                        </View>
+                        <View>
+                            <Text style={styles.itemsCardTitle}>Itens & Cálculos</Text>
+                            <Text style={styles.itemsCardSub}>
+                                {itemsCount === 0
+                                    ? 'Nenhum item adicionado'
+                                    : `${itemsCount} ${itemsCount === 1 ? 'item' : 'itens'} · R$ ${itemsTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                                }
+                            </Text>
+                        </View>
+                    </View>
+                    <ChevronRight size={20} color={COLORS.textSecondary} />
+                </Pressable>
 
                 {/* Actions */}
                 <View style={styles.actionsContainer}>
@@ -378,4 +414,42 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: COLORS.white,
     },
+
+    // Items Card
+    itemsCard: {
+        backgroundColor: COLORS.card,
+        borderRadius: 20,
+        padding: 20,
+        marginBottom: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        ...SHADOWS.card,
+    },
+    itemsCardLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 14,
+        flex: 1,
+    },
+    itemsIconBox: {
+        width: 48,
+        height: 48,
+        borderRadius: 14,
+        backgroundColor: '#EFF6FF',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    itemsCardTitle: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: COLORS.textPrimary,
+        marginBottom: 2,
+    },
+    itemsCardSub: {
+        fontSize: 13,
+        color: COLORS.textSecondary,
+        fontWeight: '500',
+    },
 });
+

@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import BudgetsList from '../modules/budgets/screens/BudgetsList';
 import BudgetForm from '../modules/budgets/screens/BudgetForm';
 import BudgetDetails from '../modules/budgets/screens/BudgetDetails';
+import BudgetItems from '../modules/budgets/screens/BudgetItems';
 import { COLORS } from '../theme';
 
 const Stack = createNativeStackNavigator();
@@ -42,8 +43,12 @@ export default function RootNavigator() {
                     component={BudgetDetails}
                     options={{ headerShown: false }}
                 />
+                <Stack.Screen
+                    name="BudgetItems"
+                    component={BudgetItems}
+                    options={{ headerShown: false }}
+                />
             </Stack.Navigator>
         </NavigationContainer>
     );
 }
-
