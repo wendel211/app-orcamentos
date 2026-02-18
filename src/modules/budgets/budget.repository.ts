@@ -108,3 +108,98 @@ export async function getBudget(id: string): Promise<Budget | null> {
         id
     );
 }
+
+export interface DashboardData {
+    totalBudgets: number;
+    totalApproved: number;
+    totalSent: number;
+    totalPending: number;
+    totalRejected: number;
+    approvalRate: number;
+    revenueTotal: number;
+    revenueThisWeek: number;
+    revenueThisMonth: number;
+    averageTicket: number;
+    recentBudgets: Budget[];
+}
+
+export async function getDashboardData(): Promise<DashboardData> {
+    const db = getDatabase();
+
+    // Status counts
+    const counts = await db.getAllAsync<{ status: string; count: number }>(
+        `SELECT status, COUNT(*) as count FROM budgets WHERE deleted_at IS NULL GROUP BY status`
+    );
+
+    const countMap: Record<string, number> = {};
+    for (const row of counts) countMap[row.status] = row.count;
+
+    const totalApproved = countMap['APROVADO'] ?? 0;
+    const totalSent = countMap['ENVIADO'] ?? 0;
+    const totalPending = countMap['EM_ANALISE'] ?? 0;
+    const totalRejected = countMap['RECUSADO'] ?? 0;
+    const totalBudgets = totalApproved + totalSent + totalPending + totalRejected;
+    const approvalRate = totalBudgets > 0 ? Math.round((totalApproved / totalBudgets) * 100) : 0;
+
+    // Revenue: sum of (qty * unit_price) for items of APPROVED budgets
+    const revenueRow = await db.getFirstAsync<{ total: number }>(
+        `SELECT COALESCE(SUM(i.qty * i.unit_price), 0) as total
+         FROM items i
+         INNER JOIN budgets b ON b.id = i.budget_id
+         WHERE b.status = 'APROVADO'
+           AND b.deleted_at IS NULL
+           AND i.deleted_at IS NULL`
+    );
+    const revenueTotal = revenueRow?.total ?? 0;
+    const averageTicket = totalApproved > 0 ? revenueTotal / totalApproved : 0;
+
+    // Revenue this week (last 7 days)
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - 7);
+    const weekRow = await db.getFirstAsync<{ total: number }>(
+        `SELECT COALESCE(SUM(i.qty * i.unit_price), 0) as total
+         FROM items i
+         INNER JOIN budgets b ON b.id = i.budget_id
+         WHERE b.status = 'APROVADO'
+           AND b.deleted_at IS NULL
+           AND i.deleted_at IS NULL
+           AND b.updated_at >= ?`,
+        weekStart.toISOString()
+    );
+    const revenueThisWeek = weekRow?.total ?? 0;
+
+    // Revenue this month
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const monthRow = await db.getFirstAsync<{ total: number }>(
+        `SELECT COALESCE(SUM(i.qty * i.unit_price), 0) as total
+         FROM items i
+         INNER JOIN budgets b ON b.id = i.budget_id
+         WHERE b.status = 'APROVADO'
+           AND b.deleted_at IS NULL
+           AND i.deleted_at IS NULL
+           AND b.updated_at >= ?`,
+        monthStart
+    );
+    const revenueThisMonth = monthRow?.total ?? 0;
+
+    // Recent budgets (last 5)
+    const recentBudgets = await db.getAllAsync<Budget>(
+        `SELECT * FROM budgets WHERE deleted_at IS NULL ORDER BY updated_at DESC LIMIT 5`
+    );
+
+    return {
+        totalBudgets,
+        totalApproved,
+        totalSent,
+        totalPending,
+        totalRejected,
+        approvalRate,
+        revenueTotal,
+        revenueThisWeek,
+        revenueThisMonth,
+        averageTicket,
+        recentBudgets,
+    };
+}
+

@@ -7,7 +7,8 @@ import {
     StyleSheet,
     StatusBar,
     SafeAreaView,
-    Platform
+    Platform,
+    TextInput,
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { listBudgets } from '../budget.repository';
@@ -22,13 +23,17 @@ import {
     Clock,
     AlertCircle,
     FileText,
-    Send
+    Send,
+    Search,
+    X,
+    BarChart2
 } from 'lucide-react-native';
 
 export default function BudgetsList() {
     const navigation = useNavigation();
     const [data, setData] = useState<any[]>([]);
     const [refreshing, setRefreshing] = useState(false);
+    const [search, setSearch] = useState('');
 
     const load = async () => {
         const result = await listBudgets();
@@ -76,6 +81,16 @@ export default function BudgetsList() {
     const countApproved = data.filter(b => b.status === 'APROVADO').length;
     const countPending = data.filter(b => b.status === 'EM_ANALISE' || !b.status).length;
 
+    // Filtered list
+    const query = search.trim().toLowerCase();
+    const filtered = query
+        ? data.filter(b =>
+            b.title?.toLowerCase().includes(query) ||
+            b.client_name?.toLowerCase().includes(query) ||
+            b.address?.toLowerCase().includes(query)
+        )
+        : data;
+
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
@@ -86,6 +101,15 @@ export default function BudgetsList() {
                     <Text style={styles.headerGreeting}>Olá, Mestre!</Text>
                     <Text style={styles.headerSubtitle}>Vamos gerenciar suas obras</Text>
                 </View>
+                <Pressable
+                    onPress={() => (navigation as any).navigate('Dashboard')}
+                    style={({ pressed }) => [
+                        styles.dashBtn,
+                        pressed && { opacity: 0.8, transform: [{ scale: 0.96 }] }
+                    ]}
+                >
+                    <BarChart2 size={22} color={COLORS.primary} />
+                </Pressable>
             </View>
 
             {/* Stats Cards */}
@@ -130,14 +154,44 @@ export default function BudgetsList() {
                 </Pressable>
             </View>
 
+            {/* Search Bar */}
+            <View style={styles.searchWrapper}>
+                <Search size={18} color={COLORS.textSecondary} style={{ marginRight: 10 }} />
+                <TextInput
+                    value={search}
+                    onChangeText={setSearch}
+                    placeholder="Buscar por título, cliente ou endereço..."
+                    placeholderTextColor={COLORS.textSecondary}
+                    style={styles.searchInput}
+                    returnKeyType="search"
+                    clearButtonMode="never"
+                />
+                {search.length > 0 && (
+                    <Pressable onPress={() => setSearch('')} hitSlop={8}>
+                        <X size={18} color={COLORS.textSecondary} />
+                    </Pressable>
+                )}
+            </View>
+
             {/* List */}
             <FlatList
-                data={data}
+                data={filtered}
                 keyExtractor={(item) => item.id}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: 20 }}
                 refreshing={refreshing}
                 onRefresh={handleRefresh}
+                ListEmptyComponent={
+                    <View style={styles.emptyBox}>
+                        <Search size={36} color={COLORS.border} />
+                        <Text style={styles.emptyText}>
+                            {query ? 'Nenhum resultado encontrado' : 'Nenhum orçamento ainda'}
+                        </Text>
+                        <Text style={styles.emptySubtext}>
+                            {query ? `Tente buscar por outro termo` : 'Toque em Novo para criar o primeiro'}
+                        </Text>
+                    </View>
+                }
                 renderItem={({ item }) => {
                     const status = getStatusBadge(item.status);
                     const StatusIcon = status.icon;
@@ -199,7 +253,9 @@ const styles = StyleSheet.create({
 
     // Header
     header: {
-        justifyContent: 'center',
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
         paddingHorizontal: 24,
         paddingTop: 40,
         paddingBottom: 20,
@@ -217,6 +273,16 @@ const styles = StyleSheet.create({
         color: COLORS.textSecondary,
         fontWeight: '500',
         letterSpacing: -0.5,
+    },
+    dashBtn: {
+        width: 44,
+        height: 44,
+        borderRadius: 14,
+        backgroundColor: COLORS.card,
+        alignItems: 'center',
+        justifyContent: 'center',
+        ...SHADOWS.card,
+        shadowOpacity: 0.06,
     },
 
 
@@ -330,4 +396,43 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         flex: 1,
     },
+
+    // Search
+    searchWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: COLORS.card,
+        marginHorizontal: 20,
+        marginBottom: 16,
+        borderRadius: 16,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        ...SHADOWS.card,
+        shadowOpacity: 0.06,
+    },
+    searchInput: {
+        flex: 1,
+        fontSize: 15,
+        color: COLORS.textPrimary,
+        fontWeight: '500',
+    },
+
+    // Empty state
+    emptyBox: {
+        alignItems: 'center',
+        paddingVertical: 48,
+        gap: 10,
+    },
+    emptyText: {
+        fontSize: 17,
+        fontWeight: '700',
+        color: COLORS.textPrimary,
+    },
+    emptySubtext: {
+        fontSize: 14,
+        color: COLORS.textSecondary,
+        textAlign: 'center',
+        paddingHorizontal: 32,
+    },
 });
+

@@ -5,6 +5,7 @@ import BudgetsList from '../modules/budgets/screens/BudgetsList';
 import BudgetForm from '../modules/budgets/screens/BudgetForm';
 import BudgetDetails from '../modules/budgets/screens/BudgetDetails';
 import BudgetItems from '../modules/budgets/screens/BudgetItems';
+import Dashboard from '../modules/budgets/screens/Dashboard';
 import { COLORS } from '../theme';
 
 const Stack = createNativeStackNavigator();
@@ -46,6 +47,11 @@ export default function RootNavigator() {
                 <Stack.Screen
                     name="BudgetItems"
                     component={BudgetItems}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="Dashboard"
+                    component={Dashboard}
                     options={{ headerShown: false }}
                 />
             </Stack.Navigator>
