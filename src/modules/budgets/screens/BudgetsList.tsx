@@ -5,15 +5,16 @@ import {
     FlatList,
     Pressable,
     StyleSheet,
-    StatusBar,
     SafeAreaView,
     Platform,
+    StatusBar,
     TextInput,
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { listBudgets } from '../budget.repository';
 import { syncData } from '../../sync/sync.service';
-import { COLORS, SHADOWS } from '../../../theme';
+import ConfirmationModal from '../../../components/ConfirmationModal';
+import { COLORS, FONTS, SHADOWS } from '../../../theme';
 import {
     Plus,
     Calendar,
@@ -26,7 +27,8 @@ import {
     Send,
     Search,
     X,
-    BarChart2
+    BarChart2,
+    ChevronRight,
 } from 'lucide-react-native';
 
 export default function BudgetsList() {
@@ -34,10 +36,25 @@ export default function BudgetsList() {
     const [data, setData] = useState<any[]>([]);
     const [refreshing, setRefreshing] = useState(false);
     const [search, setSearch] = useState('');
+    const [budgetToDelete, setBudgetToDelete] = useState<any | null>(null);
 
     const load = async () => {
         const result = await listBudgets();
         setData(result);
+    };
+
+    const handleDeletePress = (budget: any) => setBudgetToDelete(budget);
+
+    const confirmDelete = async () => {
+        if (!budgetToDelete) return;
+        try {
+            const { deleteBudget } = await import('../budget.repository');
+            await deleteBudget(budgetToDelete.id);
+            setBudgetToDelete(null);
+            await load();
+        } catch {
+            setBudgetToDelete(null);
+        }
     };
 
     const handleRefresh = async () => {
@@ -56,32 +73,26 @@ export default function BudgetsList() {
 
     function formatDate(dateStr: string): string {
         const date = new Date(dateStr);
-        return date.toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-        });
+        return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
     }
 
     function getStatusBadge(status: string) {
         switch (status) {
             case 'APROVADO':
-                return { label: 'Aprovado', bg: '#DCFCE7', color: '#166534', icon: CheckCircle };
+                return { label: 'Aprovado', bg: COLORS.successBg, color: COLORS.success, icon: CheckCircle, accent: COLORS.success };
             case 'RECUSADO':
-                return { label: 'Recusado', bg: '#FEE2E2', color: '#991B1B', icon: AlertCircle };
+                return { label: 'Recusado', bg: COLORS.errorBg, color: COLORS.error, icon: AlertCircle, accent: COLORS.error };
             case 'ENVIADO':
-                return { label: 'Enviado', bg: '#DBEAFE', color: '#1E40AF', icon: Send };
+                return { label: 'Enviado', bg: COLORS.infoBg, color: COLORS.info, icon: Send, accent: COLORS.info };
             default:
-                return { label: 'Em Análise', bg: '#FEF3C7', color: '#92400E', icon: Clock };
+                return { label: 'Em Análise', bg: COLORS.warningBg, color: COLORS.warning, icon: Clock, accent: COLORS.warning };
         }
     }
 
-    // Counts
     const countTotal = data.length;
     const countApproved = data.filter(b => b.status === 'APROVADO').length;
     const countPending = data.filter(b => b.status === 'EM_ANALISE' || !b.status).length;
 
-    // Filtered list
     const query = search.trim().toLowerCase();
     const filtered = query
         ? data.filter(b =>
@@ -93,102 +104,91 @@ export default function BudgetsList() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+            <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
-            {/* Header Area */}
+            {/* Dark Navy Header */}
             <View style={styles.header}>
                 <View>
-                    <Text style={styles.headerGreeting}>Olá, Mestre!</Text>
-                    <Text style={styles.headerSubtitle}>Vamos gerenciar suas obras</Text>
+                    <Text style={styles.headerTitle}>Orçamentos</Text>
+                    <Text style={styles.headerSub}>Gerencie seus projetos</Text>
                 </View>
                 <Pressable
                     onPress={() => (navigation as any).navigate('Dashboard')}
-                    style={({ pressed }) => [
-                        styles.dashBtn,
-                        pressed && { opacity: 0.8, transform: [{ scale: 0.96 }] }
-                    ]}
+                    style={({ pressed }) => [styles.dashBtn, pressed && { opacity: 0.7 }]}
                 >
-                    <BarChart2 size={22} color={COLORS.primary} />
+                    <BarChart2 size={20} color={COLORS.white} />
                 </Pressable>
             </View>
 
-            {/* Stats Cards */}
+            {/* Stats Row */}
             <View style={styles.statsRow}>
                 <View style={styles.statCard}>
-                    <View style={[styles.iconBox, { backgroundColor: '#DBEAFE' }]}>
-                        <FileText size={20} color={COLORS.primary} />
-                    </View>
                     <Text style={styles.statValue}>{countTotal}</Text>
                     <Text style={styles.statLabel}>Total</Text>
                 </View>
-
+                <View style={styles.statDivider} />
                 <View style={styles.statCard}>
-                    <View style={[styles.iconBox, { backgroundColor: '#DCFCE7' }]}>
-                        <CheckCircle size={20} color={COLORS.success} />
-                    </View>
-                    <Text style={styles.statValue}>{countApproved}</Text>
+                    <Text style={[styles.statValue, { color: COLORS.success }]}>{countApproved}</Text>
                     <Text style={styles.statLabel}>Aprovados</Text>
                 </View>
-
+                <View style={styles.statDivider} />
                 <View style={styles.statCard}>
-                    <View style={[styles.iconBox, { backgroundColor: '#FEF3C7' }]}>
-                        <Clock size={20} color={'#D97706'} />
-                    </View>
-                    <Text style={styles.statValue}>{countPending}</Text>
-                    <Text style={styles.statLabel}>Análise</Text>
+                    <Text style={[styles.statValue, { color: COLORS.warning }]}>{countPending}</Text>
+                    <Text style={styles.statLabel}>Em Análise</Text>
                 </View>
             </View>
 
-            {/* List Header */}
-            <View style={styles.listHeader}>
-                <Text style={styles.sectionTitle}>Seus Orçamentos</Text>
+            {/* Search + New Button */}
+            <View style={styles.toolbar}>
+                <View style={styles.searchWrapper}>
+                    <Search size={16} color={COLORS.textSecondary} />
+                    <TextInput
+                        value={search}
+                        onChangeText={setSearch}
+                        placeholder="Buscar orçamento..."
+                        placeholderTextColor={COLORS.textMuted}
+                        style={styles.searchInput}
+                        returnKeyType="search"
+                    />
+                    {search.length > 0 && (
+                        <Pressable onPress={() => setSearch('')} hitSlop={8}>
+                            <X size={16} color={COLORS.textSecondary} />
+                        </Pressable>
+                    )}
+                </View>
                 <Pressable
                     onPress={() => (navigation as any).navigate('BudgetForm')}
-                    style={({ pressed }) => [
-                        styles.addBtn,
-                        pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] }
-                    ]}
+                    style={({ pressed }) => [styles.addBtn, pressed && { opacity: 0.85 }]}
                 >
-                    <Plus size={20} color={COLORS.white} strokeWidth={3} />
-                    <Text style={styles.addBtnText}>Novo</Text>
+                    <Plus size={20} color={COLORS.white} strokeWidth={2.5} />
                 </Pressable>
             </View>
 
-            {/* Search Bar */}
-            <View style={styles.searchWrapper}>
-                <Search size={18} color={COLORS.textSecondary} style={{ marginRight: 10 }} />
-                <TextInput
-                    value={search}
-                    onChangeText={setSearch}
-                    placeholder="Buscar por título, cliente ou endereço..."
-                    placeholderTextColor={COLORS.textSecondary}
-                    style={styles.searchInput}
-                    returnKeyType="search"
-                    clearButtonMode="never"
-                />
-                {search.length > 0 && (
-                    <Pressable onPress={() => setSearch('')} hitSlop={8}>
-                        <X size={18} color={COLORS.textSecondary} />
-                    </Pressable>
-                )}
-            </View>
+            {/* Section Label */}
+            {filtered.length > 0 && (
+                <Text style={styles.sectionLabel}>
+                    {query ? `${filtered.length} resultado(s)` : 'Todos os orçamentos'}
+                </Text>
+            )}
 
             {/* List */}
             <FlatList
                 data={filtered}
                 keyExtractor={(item) => item.id}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: 20 }}
+                contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: 16 }}
                 refreshing={refreshing}
                 onRefresh={handleRefresh}
                 ListEmptyComponent={
                     <View style={styles.emptyBox}>
-                        <Search size={36} color={COLORS.border} />
+                        <View style={styles.emptyIcon}>
+                            <FileText size={32} color={COLORS.textMuted} />
+                        </View>
                         <Text style={styles.emptyText}>
-                            {query ? 'Nenhum resultado encontrado' : 'Nenhum orçamento ainda'}
+                            {query ? 'Nenhum resultado' : 'Nenhum orçamento ainda'}
                         </Text>
                         <Text style={styles.emptySubtext}>
-                            {query ? `Tente buscar por outro termo` : 'Toque em Novo para criar o primeiro'}
+                            {query ? 'Tente outro termo de busca' : 'Toque em + para criar o primeiro'}
                         </Text>
                     </View>
                 }
@@ -198,47 +198,72 @@ export default function BudgetsList() {
 
                     return (
                         <Pressable
-                            onPress={() =>
-                                (navigation as any).navigate('BudgetDetails', {
-                                    id: item.id,
-                                })
-                            }
+                            onPress={() => (navigation as any).navigate('BudgetDetails', { id: item.id })}
                             style={({ pressed }) => [
                                 styles.card,
-                                pressed && { transform: [{ scale: 0.98 }] },
+                                pressed && { transform: [{ scale: 0.985 }], opacity: 0.95 },
                             ]}
                         >
-                            <View style={styles.cardHeader}>
-                                <Text style={styles.cardTitle} numberOfLines={1}>{item.title}</Text>
-                                <View style={[styles.badge, { backgroundColor: status.bg }]}>
-                                    <StatusIcon size={12} color={status.color} strokeWidth={2.5} />
-                                    <Text style={[styles.badgeText, { color: status.color }]}>
-                                        {status.label}
-                                    </Text>
-                                </View>
-                            </View>
+                            {/* Left accent */}
+                            <View style={[styles.cardAccent, { backgroundColor: status.accent }]} />
 
-                            <View style={styles.cardBody}>
+                            <View style={styles.cardContent}>
+                                {/* Title + Badge */}
+                                <View style={styles.cardTop}>
+                                    <Text style={styles.cardTitle} numberOfLines={1}>{item.title}</Text>
+                                    <View style={[styles.badge, { backgroundColor: status.bg }]}>
+                                        <StatusIcon size={11} color={status.color} strokeWidth={2.5} />
+                                        <Text style={[styles.badgeText, { color: status.color }]}>
+                                            {status.label}
+                                        </Text>
+                                    </View>
+                                </View>
+
+                                {/* Meta info */}
                                 <View style={styles.metaRow}>
-                                    <User size={16} color={COLORS.textSecondary} />
+                                    <User size={13} color={COLORS.textSecondary} />
                                     <Text style={styles.metaText}>{item.client_name}</Text>
                                 </View>
-
                                 <View style={styles.metaRow}>
-                                    <Calendar size={16} color={COLORS.textSecondary} />
+                                    <Calendar size={13} color={COLORS.textSecondary} />
                                     <Text style={styles.metaText}>{formatDate(item.created_at)}</Text>
                                 </View>
-
                                 {item.address && (
                                     <View style={styles.metaRow}>
-                                        <MapPin size={16} color={COLORS.textSecondary} />
+                                        <MapPin size={13} color={COLORS.textSecondary} />
                                         <Text style={styles.metaText} numberOfLines={1}>{item.address}</Text>
                                     </View>
                                 )}
+
+                                {/* Footer */}
+                                <View style={styles.cardFooter}>
+                                    <Pressable
+                                        onPress={() => handleDeletePress(item)}
+                                        style={({ pressed }) => [styles.deleteBtn, pressed && { opacity: 0.7 }]}
+                                        hitSlop={6}
+                                    >
+                                        <Text style={styles.deleteBtnText}>Excluir</Text>
+                                    </Pressable>
+                                    <View style={styles.detailsHint}>
+                                        <Text style={styles.detailsHintText}>Ver detalhes</Text>
+                                        <ChevronRight size={14} color={COLORS.accent} />
+                                    </View>
+                                </View>
                             </View>
                         </Pressable>
                     );
                 }}
+            />
+
+            <ConfirmationModal
+                visible={!!budgetToDelete}
+                title="Excluir Orçamento"
+                message={`Tem certeza que deseja excluir "${budgetToDelete?.title}"?`}
+                confirmText="Sim, excluir"
+                cancelText="Cancelar"
+                onConfirm={confirmDelete}
+                onCancel={() => setBudgetToDelete(null)}
+                type="danger"
             />
         </SafeAreaView>
     );
@@ -248,191 +273,229 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: COLORS.background,
-        paddingTop: Platform.OS === 'android' ? 40 : 0,
+        paddingTop: Platform.OS === 'android' ? 0 : 0,
     },
 
-    // Header
+    // Header — dark navy
     header: {
+        backgroundColor: COLORS.primary,
+        paddingHorizontal: 20,
+        paddingTop: Platform.OS === 'android' ? 48 : 20,
+        paddingBottom: 20,
         flexDirection: 'row',
         alignItems: 'flex-start',
         justifyContent: 'space-between',
-        paddingHorizontal: 24,
-        paddingTop: 40,
-        paddingBottom: 20,
-        marginBottom: 10,
     },
-    headerGreeting: {
-        fontSize: 34,
-        fontWeight: '800',
-        color: COLORS.textPrimary,
-        letterSpacing: -1.5,
-        marginBottom: 8,
-    },
-    headerSubtitle: {
-        fontSize: 16,
-        color: COLORS.textSecondary,
-        fontWeight: '500',
+    headerTitle: {
+        fontFamily: FONTS.bold,
+        fontSize: 26,
+        color: COLORS.white,
         letterSpacing: -0.5,
     },
+    headerSub: {
+        fontFamily: FONTS.regular,
+        fontSize: 13,
+        color: 'rgba(255,255,255,0.65)',
+        marginTop: 2,
+    },
     dashBtn: {
-        width: 44,
-        height: 44,
-        borderRadius: 14,
-        backgroundColor: COLORS.card,
+        width: 40,
+        height: 40,
+        borderRadius: 12,
+        backgroundColor: 'rgba(255,255,255,0.15)',
         alignItems: 'center',
         justifyContent: 'center',
-        ...SHADOWS.card,
-        shadowOpacity: 0.06,
+        marginTop: 4,
     },
 
-
-    // Stats
+    // Stats row — white card attached to header
     statsRow: {
+        backgroundColor: COLORS.card,
         flexDirection: 'row',
-        paddingHorizontal: 20,
-        gap: 12,
-        marginBottom: 32,
+        marginHorizontal: 16,
+        marginTop: -1,
+        borderRadius: 16,
+        paddingVertical: 16,
+        paddingHorizontal: 8,
+        ...SHADOWS.cardMd,
+        marginBottom: 16,
     },
     statCard: {
         flex: 1,
-        backgroundColor: COLORS.card,
-        borderRadius: 16,
-        padding: 16,
-        alignItems: 'flex-start',
-        ...SHADOWS.card,
-    },
-    iconBox: {
-        width: 36,
-        height: 36,
-        borderRadius: 10,
         alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 10,
     },
     statValue: {
-        fontSize: 20,
-        fontWeight: '800',
+        fontFamily: FONTS.bold,
+        fontSize: 22,
         color: COLORS.textPrimary,
     },
     statLabel: {
+        fontFamily: FONTS.medium,
         fontSize: 12,
         color: COLORS.textSecondary,
-        fontWeight: '600',
+        marginTop: 2,
+    },
+    statDivider: {
+        width: 1,
+        backgroundColor: COLORS.border,
+        marginVertical: 4,
     },
 
-    // List Header
-    listHeader: {
+    // Toolbar
+    toolbar: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 20,
-        marginBottom: 16,
+        paddingHorizontal: 16,
+        gap: 10,
+        marginBottom: 12,
     },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: '700',
+    searchWrapper: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: COLORS.card,
+        borderRadius: 12,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        gap: 8,
+        ...SHADOWS.card,
+    },
+    searchInput: {
+        flex: 1,
+        fontFamily: FONTS.regular,
+        fontSize: 14,
         color: COLORS.textPrimary,
+        padding: 0,
     },
     addBtn: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        width: 44,
+        height: 44,
+        borderRadius: 12,
         backgroundColor: COLORS.primary,
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        borderRadius: 24,
-        gap: 6,
+        alignItems: 'center',
+        justifyContent: 'center',
         ...SHADOWS.button,
     },
-    addBtnText: {
-        color: COLORS.white,
-        fontWeight: '700',
-        fontSize: 14,
+
+    // Section label
+    sectionLabel: {
+        fontFamily: FONTS.semiBold,
+        fontSize: 11,
+        color: COLORS.textSecondary,
+        letterSpacing: 0.8,
+        textTransform: 'uppercase',
+        paddingHorizontal: 20,
+        marginBottom: 10,
     },
 
     // Card
     card: {
         backgroundColor: COLORS.card,
-        borderRadius: 20,
-        padding: 20,
-        marginBottom: 16,
+        borderRadius: 16,
+        marginBottom: 12,
+        flexDirection: 'row',
+        overflow: 'hidden',
         ...SHADOWS.card,
     },
-    cardHeader: {
+    cardAccent: {
+        width: 4,
+    },
+    cardContent: {
+        flex: 1,
+        padding: 16,
+    },
+    cardTop: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 16,
+        justifyContent: 'space-between',
+        marginBottom: 10,
     },
     cardTitle: {
-        fontSize: 17,
-        fontWeight: '700',
+        fontFamily: FONTS.bold,
+        fontSize: 15,
         color: COLORS.textPrimary,
         flex: 1,
-        marginRight: 10,
+        marginRight: 8,
     },
     badge: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 8,
-        paddingVertical: 4,
+        paddingVertical: 3,
         borderRadius: 8,
         gap: 4,
     },
     badgeText: {
+        fontFamily: FONTS.bold,
         fontSize: 11,
-        fontWeight: '700',
-    },
-    cardBody: {
-        gap: 10,
     },
     metaRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
+        gap: 6,
+        marginBottom: 4,
     },
     metaText: {
-        fontSize: 14,
+        fontFamily: FONTS.regular,
+        fontSize: 13,
         color: COLORS.textSecondary,
-        fontWeight: '500',
         flex: 1,
     },
-
-    // Search
-    searchWrapper: {
+    cardFooter: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: COLORS.card,
-        marginHorizontal: 20,
-        marginBottom: 16,
-        borderRadius: 16,
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        ...SHADOWS.card,
-        shadowOpacity: 0.06,
+        justifyContent: 'space-between',
+        marginTop: 10,
+        paddingTop: 10,
+        borderTopWidth: 1,
+        borderTopColor: COLORS.divider,
     },
-    searchInput: {
-        flex: 1,
-        fontSize: 15,
-        color: COLORS.textPrimary,
-        fontWeight: '500',
+    deleteBtn: {
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 8,
+        backgroundColor: COLORS.errorBg,
+    },
+    deleteBtnText: {
+        fontFamily: FONTS.semiBold,
+        fontSize: 12,
+        color: COLORS.error,
+    },
+    detailsHint: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 2,
+    },
+    detailsHintText: {
+        fontFamily: FONTS.semiBold,
+        fontSize: 12,
+        color: COLORS.accent,
     },
 
     // Empty state
     emptyBox: {
         alignItems: 'center',
-        paddingVertical: 48,
-        gap: 10,
+        paddingVertical: 60,
+        gap: 12,
+    },
+    emptyIcon: {
+        width: 72,
+        height: 72,
+        borderRadius: 20,
+        backgroundColor: COLORS.card,
+        alignItems: 'center',
+        justifyContent: 'center',
+        ...SHADOWS.card,
     },
     emptyText: {
+        fontFamily: FONTS.bold,
         fontSize: 17,
-        fontWeight: '700',
         color: COLORS.textPrimary,
     },
     emptySubtext: {
+        fontFamily: FONTS.regular,
         fontSize: 14,
         color: COLORS.textSecondary,
         textAlign: 'center',
-        paddingHorizontal: 32,
     },
 });
-

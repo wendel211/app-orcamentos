@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { createBudget, updateBudget, getBudget } from '../budget.repository';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { COLORS, SHADOWS } from '../../../theme';
+import { COLORS, FONTS, SHADOWS } from '../../../theme';
 import {
     Check,
     ChevronLeft,
@@ -105,21 +105,21 @@ export default function BudgetForm() {
                 style={{ flex: 1 }}
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             >
-                {/* Modern Header */}
+                {/* Dark Navy Header */}
                 <View style={styles.header}>
                     <Pressable
                         onPress={() => navigation.goBack()}
                         style={({ pressed }) => [
                             styles.backButton,
-                            pressed && { backgroundColor: '#F1F5F9' }
+                            pressed && { opacity: 0.7 }
                         ]}
                     >
-                        <ChevronLeft size={28} color={COLORS.primary} strokeWidth={2.5} />
+                        <ChevronLeft size={24} color={COLORS.white} strokeWidth={2.5} />
                     </Pressable>
                     <Text style={styles.headerTitle}>
                         {editId ? 'Editar Orçamento' : 'Novo Orçamento'}
                     </Text>
-                    <View style={{ width: 44 }} />
+                    <View style={{ width: 38 }} />
                 </View>
 
                 <ScrollView
@@ -256,28 +256,28 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.background,
     },
 
-    // Header
+    // Header — dark navy
     header: {
+        backgroundColor: COLORS.primary,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 20,
-        paddingVertical: 10,
+        paddingTop: Platform.OS === 'android' ? 48 : 20,
+        paddingBottom: 18,
     },
     backButton: {
-        width: 44,
-        height: 44,
-        borderRadius: 12,
+        width: 38,
+        height: 38,
+        borderRadius: 10,
+        backgroundColor: 'rgba(255,255,255,0.15)',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: COLORS.card,
-        ...SHADOWS.card,
-        shadowOpacity: 0.05,
     },
     headerTitle: {
+        fontFamily: FONTS.bold,
         fontSize: 18,
-        fontWeight: '700',
-        color: COLORS.textPrimary,
+        color: COLORS.white,
     },
 
     scrollContent: {
@@ -306,16 +306,17 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     label: {
+        fontFamily: FONTS.bold,
         fontSize: 11,
-        fontWeight: '800',
-        color: COLORS.primary, // Blue label
+        color: COLORS.textSecondary,
         marginBottom: 8,
-        letterSpacing: 0.5,
+        letterSpacing: 0.8,
+        textTransform: 'uppercase',
     },
     inputWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#F8FAFC',
+        backgroundColor: COLORS.cardAlt,
         borderBottomWidth: 2,
         borderBottomColor: COLORS.border,
         paddingHorizontal: 4,
@@ -326,9 +327,9 @@ const styles = StyleSheet.create({
     },
     input: {
         flex: 1,
+        fontFamily: FONTS.semiBold,
         fontSize: 16,
         color: COLORS.textPrimary,
-        fontWeight: '600',
     },
 
     // Status Grid
@@ -357,8 +358,8 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     statusLabel: {
+        fontFamily: FONTS.semiBold,
         fontSize: 13,
-        fontWeight: '600',
         color: COLORS.textSecondary,
     },
     checkBadge: {
@@ -389,8 +390,8 @@ const styles = StyleSheet.create({
         shadowOpacity: 0,
     },
     saveBtnText: {
+        fontFamily: FONTS.bold,
         color: COLORS.white,
-        fontWeight: '700',
-        fontSize: 18,
+        fontSize: 17,
     },
 });

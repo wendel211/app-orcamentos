@@ -14,7 +14,7 @@ import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/nativ
 import { getBudget, deleteBudget } from '../budget.repository';
 import { listItems } from '../../items/item.repository';
 import ConfirmationModal from '../../../components/ConfirmationModal';
-import { COLORS, SHADOWS } from '../../../theme';
+import { COLORS, FONTS, SHADOWS } from '../../../theme';
 import {
     Edit2,
     Trash2,
@@ -114,17 +114,19 @@ export default function BudgetDetails() {
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Custom Header (Simple & Clean) - Sync remove from here */}
+            {/* Dark Navy Header */}
             <View style={styles.header}>
                 <Pressable
                     onPress={() => navigation.goBack()}
                     style={({ pressed }) => [
                         styles.backButton,
-                        pressed && { backgroundColor: '#F1F5F9' }
+                        pressed && { opacity: 0.7 }
                     ]}
                 >
-                    <ChevronLeft size={28} color={COLORS.primary} strokeWidth={2.5} />
+                    <ChevronLeft size={24} color={COLORS.white} strokeWidth={2.5} />
                 </Pressable>
+                <Text style={styles.headerTitle} numberOfLines={1}>{budget?.title || 'Detalhes'}</Text>
+                <View style={{ width: 40 }} />
             </View>
 
             <ScrollView
@@ -280,23 +282,31 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.background,
     },
 
-    // Header
+    // Header — dark navy
     header: {
+        backgroundColor: COLORS.primary,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'flex-start', // Changed to flex-start
+        justifyContent: 'space-between',
         paddingHorizontal: 20,
-        paddingVertical: 10,
+        paddingTop: Platform.OS === 'android' ? 48 : 20,
+        paddingBottom: 18,
     },
     backButton: {
-        width: 44,
-        height: 44,
-        borderRadius: 12,
+        width: 38,
+        height: 38,
+        borderRadius: 10,
+        backgroundColor: 'rgba(255,255,255,0.15)',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: COLORS.card,
-        ...SHADOWS.card,
-        shadowOpacity: 0.05,
+    },
+    headerTitle: {
+        fontFamily: FONTS.bold,
+        fontSize: 18,
+        color: COLORS.white,
+        flex: 1,
+        textAlign: 'center',
+        marginHorizontal: 8,
     },
 
     scrollContent: {
@@ -315,8 +325,8 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     statusBannerText: {
-        fontSize: 16,
-        fontWeight: '800',
+        fontFamily: FONTS.extraBold,
+        fontSize: 15,
         textTransform: 'uppercase',
         letterSpacing: 1,
     },
@@ -330,11 +340,11 @@ const styles = StyleSheet.create({
         ...SHADOWS.card,
     },
     cardSectionTitle: {
-        fontSize: 18,
-        fontWeight: '800',
+        fontFamily: FONTS.bold,
+        fontSize: 17,
         color: COLORS.primary,
         marginBottom: 20,
-        letterSpacing: -0.5,
+        letterSpacing: -0.3,
     },
 
     // Info Items
@@ -342,16 +352,17 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     label: {
+        fontFamily: FONTS.semiBold,
         fontSize: 11,
-        fontWeight: '700',
         color: COLORS.textSecondary,
         marginBottom: 6,
-        letterSpacing: 0.5,
+        letterSpacing: 0.8,
+        textTransform: 'uppercase',
     },
     value: {
+        fontFamily: FONTS.semiBold,
         fontSize: 16,
         color: COLORS.textPrimary,
-        fontWeight: '600',
     },
     valueRow: {
         flexDirection: 'row',
@@ -367,9 +378,9 @@ const styles = StyleSheet.create({
         paddingVertical: 4,
     },
     dateValue: {
+        fontFamily: FONTS.semiBold,
         fontSize: 15,
         color: COLORS.textPrimary,
-        fontWeight: '600',
     },
     dateValueRow: {
         flexDirection: 'row',
@@ -410,8 +421,8 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
     },
     btnText: {
+        fontFamily: FONTS.bold,
         fontSize: 16,
-        fontWeight: '700',
         color: COLORS.white,
     },
 
@@ -441,15 +452,15 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     itemsCardTitle: {
+        fontFamily: FONTS.bold,
         fontSize: 16,
-        fontWeight: '700',
         color: COLORS.textPrimary,
         marginBottom: 2,
     },
     itemsCardSub: {
+        fontFamily: FONTS.regular,
         fontSize: 13,
         color: COLORS.textSecondary,
-        fontWeight: '500',
     },
 });
 
