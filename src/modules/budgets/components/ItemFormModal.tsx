@@ -12,16 +12,16 @@ import {
     Platform,
     ScrollView,
 } from 'react-native';
-import { COLORS, SHADOWS } from '../../../theme';
+import { COLORS, FONTS, SHADOWS } from '../../../theme';
 import { ItemType } from '../../items/item.types';
 import { Hammer, Package, Wrench, X, Check } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
 const TYPE_OPTIONS: { label: string; value: ItemType; icon: any; color: string; bg: string }[] = [
-    { label: 'Material', value: 'MATERIAL', icon: Package, color: '#1E40AF', bg: '#DBEAFE' },
-    { label: 'Mão de Obra', value: 'MAO_DE_OBRA', icon: Hammer, color: '#166534', bg: '#DCFCE7' },
-    { label: 'Serviço', value: 'SERVICO', icon: Wrench, color: '#92400E', bg: '#FEF3C7' },
+    { label: 'Material', value: 'MATERIAL', icon: Package, color: COLORS.info, bg: COLORS.infoBg },
+    { label: 'Mão de Obra', value: 'MAO_DE_OBRA', icon: Hammer, color: COLORS.success, bg: COLORS.successBg },
+    { label: 'Serviço', value: 'SERVICO', icon: Wrench, color: COLORS.warning, bg: COLORS.warningBg },
 ];
 
 interface ItemFormModalProps {
@@ -232,8 +232,8 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     headerTitle: {
+        fontFamily: FONTS.bold,
         fontSize: 20,
-        fontWeight: '700',
         color: COLORS.textPrimary,
     },
     closeBtn: {
@@ -245,11 +245,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     label: {
+        fontFamily: FONTS.bold,
         fontSize: 11,
-        fontWeight: '800',
-        color: COLORS.primary,
+        color: COLORS.textSecondary,
         marginBottom: 8,
-        letterSpacing: 0.5,
+        letterSpacing: 0.8,
+        textTransform: 'uppercase',
     },
     typeRow: {
         flexDirection: 'row',
@@ -268,19 +269,19 @@ const styles = StyleSheet.create({
         borderColor: COLORS.border,
     },
     typeChipText: {
+        fontFamily: FONTS.semiBold,
         fontSize: 12,
-        fontWeight: '600',
         color: COLORS.textSecondary,
     },
     input: {
-        backgroundColor: '#F8FAFC',
+        backgroundColor: COLORS.cardAlt,
         borderBottomWidth: 2,
         borderBottomColor: COLORS.border,
         paddingHorizontal: 4,
         height: 50,
+        fontFamily: FONTS.semiBold,
         fontSize: 16,
         color: COLORS.textPrimary,
-        fontWeight: '600',
         marginBottom: 4,
     },
     row: {
@@ -298,13 +299,13 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     totalPreviewLabel: {
+        fontFamily: FONTS.semiBold,
         fontSize: 14,
-        fontWeight: '600',
         color: COLORS.primary,
     },
     totalPreviewValue: {
+        fontFamily: FONTS.extraBold,
         fontSize: 18,
-        fontWeight: '800',
         color: COLORS.primary,
     },
     saveBtn: {
@@ -323,8 +324,8 @@ const styles = StyleSheet.create({
         shadowOpacity: 0,
     },
     saveBtnText: {
+        fontFamily: FONTS.bold,
         color: COLORS.white,
-        fontWeight: '700',
         fontSize: 17,
     },
 });

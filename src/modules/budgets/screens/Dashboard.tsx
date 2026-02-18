@@ -10,7 +10,7 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { COLORS, SHADOWS } from '../../../theme';
+import { COLORS, FONTS, SHADOWS } from '../../../theme';
 import { getDashboardData, DashboardData } from '../budget.repository';
 import {
     TrendingUp,
@@ -38,10 +38,10 @@ function fmtShort(value: number) {
 }
 
 const STATUS_META: Record<string, { label: string; color: string; bg: string; icon: any }> = {
-    APROVADO: { label: 'Aprovado', color: '#166534', bg: '#DCFCE7', icon: CheckCircle },
-    ENVIADO: { label: 'Enviado', color: '#1E40AF', bg: '#DBEAFE', icon: Send },
-    EM_ANALISE: { label: 'Em Análise', color: '#92400E', bg: '#FEF3C7', icon: Clock },
-    RECUSADO: { label: 'Recusado', color: '#991B1B', bg: '#FEE2E2', icon: AlertCircle },
+    APROVADO: { label: 'Aprovado', color: COLORS.success, bg: COLORS.successBg, icon: CheckCircle },
+    ENVIADO: { label: 'Enviado', color: COLORS.info, bg: COLORS.infoBg, icon: Send },
+    EM_ANALISE: { label: 'Em Análise', color: COLORS.warning, bg: COLORS.warningBg, icon: Clock },
+    RECUSADO: { label: 'Recusado', color: COLORS.error, bg: COLORS.errorBg, icon: AlertCircle },
 };
 
 export default function Dashboard() {
@@ -67,19 +67,19 @@ export default function Dashboard() {
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Header */}
+            {/* Dark Navy Header */}
             <View style={styles.header}>
                 <Pressable
                     onPress={() => navigation.goBack()}
-                    style={({ pressed }) => [styles.backBtn, pressed && { backgroundColor: '#F1F5F9' }]}
+                    style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.7 }]}
                 >
-                    <ChevronLeft size={28} color={COLORS.primary} strokeWidth={2.5} />
+                    <ChevronLeft size={24} color={COLORS.white} strokeWidth={2.5} />
                 </Pressable>
                 <View>
                     <Text style={styles.headerTitle}>Dashboard</Text>
                     <Text style={styles.headerSub}>Visão geral dos seus orçamentos</Text>
                 </View>
-                <View style={{ width: 44 }} />
+                <View style={{ width: 38 }} />
             </View>
 
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -230,36 +230,36 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.background,
     },
 
-    // Header
+    // Header — dark navy
     header: {
+        backgroundColor: COLORS.primary,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 20,
-        paddingVertical: 10,
+        paddingTop: Platform.OS === 'android' ? 48 : 20,
+        paddingBottom: 18,
     },
     backBtn: {
-        width: 44,
-        height: 44,
-        borderRadius: 12,
+        width: 38,
+        height: 38,
+        borderRadius: 10,
+        backgroundColor: 'rgba(255,255,255,0.15)',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: COLORS.card,
-        ...SHADOWS.card,
-        shadowOpacity: 0.05,
     },
     headerTitle: {
+        fontFamily: FONTS.bold,
         fontSize: 20,
-        fontWeight: '800',
-        color: COLORS.textPrimary,
+        color: COLORS.white,
         textAlign: 'center',
-        letterSpacing: -0.5,
+        letterSpacing: -0.3,
     },
     headerSub: {
-        fontSize: 13,
-        color: COLORS.textSecondary,
+        fontFamily: FONTS.regular,
+        fontSize: 12,
+        color: 'rgba(255,255,255,0.65)',
         textAlign: 'center',
-        fontWeight: '500',
     },
 
     content: {
@@ -290,14 +290,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     heroLabel: {
+        fontFamily: FONTS.extraBold,
         fontSize: 11,
-        fontWeight: '800',
         color: 'rgba(255,255,255,0.7)',
         letterSpacing: 0.8,
     },
     heroValue: {
+        fontFamily: FONTS.extraBold,
         fontSize: 38,
-        fontWeight: '800',
         color: COLORS.white,
         letterSpacing: -1.5,
         marginBottom: 20,
@@ -321,14 +321,14 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(255,255,255,0.15)',
     },
     heroStatLabel: {
+        fontFamily: FONTS.semiBold,
         fontSize: 11,
         color: 'rgba(255,255,255,0.65)',
-        fontWeight: '600',
         textTransform: 'capitalize',
     },
     heroStatValue: {
+        fontFamily: FONTS.bold,
         fontSize: 15,
-        fontWeight: '800',
         color: COLORS.white,
     },
 
@@ -355,14 +355,14 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     kpiValue: {
+        fontFamily: FONTS.extraBold,
         fontSize: 22,
-        fontWeight: '800',
         color: COLORS.textPrimary,
     },
     kpiLabel: {
+        fontFamily: FONTS.semiBold,
         fontSize: 12,
         color: COLORS.textSecondary,
-        fontWeight: '600',
         marginTop: 2,
     },
 
@@ -375,8 +375,8 @@ const styles = StyleSheet.create({
         ...SHADOWS.card,
     },
     cardTitle: {
+        fontFamily: FONTS.bold,
         fontSize: 16,
-        fontWeight: '800',
         color: COLORS.primary,
         marginBottom: 16,
         letterSpacing: -0.3,
@@ -397,9 +397,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     statusLabel: {
+        fontFamily: FONTS.medium,
         fontSize: 14,
         color: COLORS.textSecondary,
-        fontWeight: '500',
         width: 90,
     },
     barTrack: {
@@ -414,8 +414,8 @@ const styles = StyleSheet.create({
         borderRadius: 4,
     },
     statusCount: {
+        fontFamily: FONTS.bold,
         fontSize: 14,
-        fontWeight: '700',
         width: 24,
         textAlign: 'right',
     },
@@ -437,14 +437,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     recentTitle: {
+        fontFamily: FONTS.semiBold,
         fontSize: 14,
-        fontWeight: '600',
         color: COLORS.textPrimary,
     },
     recentClient: {
+        fontFamily: FONTS.regular,
         fontSize: 12,
         color: COLORS.textSecondary,
-        fontWeight: '500',
     },
     recentBadge: {
         paddingHorizontal: 8,
@@ -452,8 +452,8 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
     recentBadgeText: {
+        fontFamily: FONTS.bold,
         fontSize: 11,
-        fontWeight: '700',
     },
     emptyText: {
         fontSize: 14,

@@ -10,7 +10,7 @@ import {
     TextInput,
 } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
-import { COLORS, SHADOWS } from '../../../theme';
+import { COLORS, FONTS, SHADOWS } from '../../../theme';
 import { listItems, createItem, deleteItem } from '../../items/item.repository';
 import { updateBudget, getBudget } from '../budget.repository';
 import { Item, ItemType } from '../../items/item.types';
@@ -29,9 +29,9 @@ import {
 } from 'lucide-react-native';
 
 const TYPE_META: Record<ItemType, { label: string; icon: any; color: string; bg: string }> = {
-    MATERIAL: { label: 'Material', icon: Package, color: '#1E40AF', bg: '#DBEAFE' },
-    MAO_DE_OBRA: { label: 'Mão de Obra', icon: Hammer, color: '#166534', bg: '#DCFCE7' },
-    SERVICO: { label: 'Serviço', icon: Wrench, color: '#92400E', bg: '#FEF3C7' },
+    MATERIAL: { label: 'Material', icon: Package, color: COLORS.info, bg: COLORS.infoBg },
+    MAO_DE_OBRA: { label: 'Mão de Obra', icon: Hammer, color: COLORS.success, bg: COLORS.successBg },
+    SERVICO: { label: 'Serviço', icon: Wrench, color: COLORS.warning, bg: COLORS.warningBg },
 };
 
 function fmt(value: number) {
@@ -108,13 +108,13 @@ export default function BudgetItems() {
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Header */}
+            {/* Dark Navy Header */}
             <View style={styles.header}>
                 <Pressable
                     onPress={() => navigation.goBack()}
-                    style={({ pressed }) => [styles.backButton, pressed && { backgroundColor: '#F1F5F9' }]}
+                    style={({ pressed }) => [styles.backButton, pressed && { opacity: 0.7 }]}
                 >
-                    <ChevronLeft size={28} color={COLORS.primary} strokeWidth={2.5} />
+                    <ChevronLeft size={24} color={COLORS.white} strokeWidth={2.5} />
                 </Pressable>
                 <Text style={styles.headerTitle}>Itens & Cálculos</Text>
                 <Pressable
@@ -292,35 +292,34 @@ const styles = StyleSheet.create({
         paddingTop: Platform.OS === 'android' ? 40 : 0,
     },
     header: {
+        backgroundColor: COLORS.primary,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 20,
-        paddingVertical: 10,
+        paddingTop: Platform.OS === 'android' ? 48 : 20,
+        paddingBottom: 16,
     },
     backButton: {
-        width: 44,
-        height: 44,
-        borderRadius: 12,
+        width: 38,
+        height: 38,
+        borderRadius: 10,
+        backgroundColor: 'rgba(255,255,255,0.15)',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: COLORS.card,
-        ...SHADOWS.card,
-        shadowOpacity: 0.05,
     },
     headerTitle: {
+        fontFamily: FONTS.bold,
         fontSize: 18,
-        fontWeight: '700',
-        color: COLORS.textPrimary,
+        color: COLORS.white,
     },
     addBtn: {
-        width: 44,
-        height: 44,
-        borderRadius: 12,
-        backgroundColor: COLORS.primary,
+        width: 38,
+        height: 38,
+        borderRadius: 10,
+        backgroundColor: 'rgba(255,255,255,0.2)',
         alignItems: 'center',
         justifyContent: 'center',
-        ...SHADOWS.button,
     },
     listContent: {
         padding: 20,
@@ -332,11 +331,12 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     emptyText: {
-        fontSize: 18,
-        fontWeight: '700',
+        fontFamily: FONTS.bold,
+        fontSize: 17,
         color: COLORS.textPrimary,
     },
     emptySubtext: {
+        fontFamily: FONTS.regular,
         fontSize: 14,
         color: COLORS.textSecondary,
         textAlign: 'center',
@@ -361,18 +361,19 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     itemName: {
+        fontFamily: FONTS.semiBold,
         fontSize: 15,
-        fontWeight: '600',
         color: COLORS.textPrimary,
         marginBottom: 2,
     },
     itemMeta: {
+        fontFamily: FONTS.regular,
         fontSize: 13,
         color: COLORS.textSecondary,
     },
     itemTotal: {
+        fontFamily: FONTS.bold,
         fontSize: 15,
-        fontWeight: '700',
         color: COLORS.textPrimary,
         marginBottom: 4,
     },
@@ -382,8 +383,8 @@ const styles = StyleSheet.create({
         borderRadius: 6,
     },
     typeBadgeText: {
+        fontFamily: FONTS.bold,
         fontSize: 10,
-        fontWeight: '700',
     },
     deleteBtn: {
         width: 32,
@@ -401,8 +402,8 @@ const styles = StyleSheet.create({
         ...SHADOWS.card,
     },
     cardTitle: {
+        fontFamily: FONTS.bold,
         fontSize: 16,
-        fontWeight: '800',
         color: COLORS.primary,
         marginBottom: 16,
         letterSpacing: -0.3,
@@ -421,15 +422,15 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     summaryLabel: {
+        fontFamily: FONTS.medium,
         flex: 1,
         fontSize: 14,
         color: COLORS.textSecondary,
-        fontWeight: '500',
     },
     summaryValue: {
+        fontFamily: FONTS.semiBold,
         fontSize: 14,
         color: COLORS.textSecondary,
-        fontWeight: '600',
     },
     divider: {
         height: 1,
@@ -449,15 +450,16 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     adjustLabel: {
+        fontFamily: FONTS.bold,
         fontSize: 11,
-        fontWeight: '700',
         color: COLORS.textSecondary,
         marginBottom: 4,
-        letterSpacing: 0.3,
+        letterSpacing: 0.5,
+        textTransform: 'uppercase',
     },
     adjustInput: {
+        fontFamily: FONTS.semiBold,
         fontSize: 16,
-        fontWeight: '600',
         color: COLORS.textPrimary,
         borderBottomWidth: 2,
         borderBottomColor: COLORS.border,
@@ -473,19 +475,21 @@ const styles = StyleSheet.create({
         ...SHADOWS.button,
     },
     totalLabel: {
+        fontFamily: FONTS.extraBold,
         fontSize: 11,
-        fontWeight: '800',
         color: 'rgba(255,255,255,0.7)',
-        letterSpacing: 1,
+        letterSpacing: 1.2,
         marginBottom: 8,
+        textTransform: 'uppercase',
     },
     totalValue: {
+        fontFamily: FONTS.extraBold,
         fontSize: 36,
-        fontWeight: '800',
         color: COLORS.white,
         letterSpacing: -1,
     },
     totalNote: {
+        fontFamily: FONTS.regular,
         fontSize: 13,
         color: 'rgba(255,255,255,0.7)',
         marginTop: 6,
