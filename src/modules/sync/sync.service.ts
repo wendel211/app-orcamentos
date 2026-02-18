@@ -94,14 +94,15 @@ async function pullChanges() {
         await db.runAsync(
             `
       INSERT INTO budgets
-      (id,title,client_name,address,discount,extra_fee,created_at,updated_at,deleted_at,synced)
-      VALUES (?,?,?,?,?,?,?,?,?,1)
+      (id,title,client_name,address,discount,extra_fee,status,created_at,updated_at,deleted_at,synced)
+      VALUES (?,?,?,?,?,?,?,?,?,?,1)
       ON CONFLICT(id) DO UPDATE SET
         title=excluded.title,
         client_name=excluded.client_name,
         address=excluded.address,
         discount=excluded.discount,
         extra_fee=excluded.extra_fee,
+        status=excluded.status,
         updated_at=excluded.updated_at,
         deleted_at=excluded.deleted_at,
         synced=1
@@ -113,6 +114,7 @@ async function pullChanges() {
                 budget.address ?? null,
                 budget.discount,
                 budget.extra_fee,
+                budget.status ?? 'EM_ANALISE',
                 budget.created_at,
                 budget.updated_at,
                 budget.deleted_at ?? null
