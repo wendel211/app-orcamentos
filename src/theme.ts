@@ -75,3 +75,77 @@ export const CARD = StyleSheet.create({
         ...SHADOWS.card,
     },
 });
+
+export const SPACING = {
+    xs: 4,
+    sm: 8,
+    md: 12,
+    lg: 16,
+    xl: 24,
+    xxl: 32,
+    xxxl: 48,
+};
+
+export const BORDER_RADIUS = {
+    sm: 8,
+    md: 12,
+    lg: 16,
+    xl: 20,
+    xxl: 24,
+    pill: 999,
+};
+
+export const TYPOGRAPHY = {
+    display: {
+        fontFamily: FONTS.extraBold,
+        fontSize: 32,
+        lineHeight: 40,
+        letterSpacing: -1,
+        color: COLORS.textPrimary,
+    },
+    h1: {
+        fontFamily: FONTS.bold,
+        fontSize: 24,
+        lineHeight: 32,
+        letterSpacing: -0.5,
+        color: COLORS.textPrimary,
+    },
+    h2: {
+        fontFamily: FONTS.bold,
+        fontSize: 20,
+        lineHeight: 28,
+        letterSpacing: -0.5,
+        color: COLORS.textPrimary,
+    },
+    h3: {
+        fontFamily: FONTS.semiBold,
+        fontSize: 18,
+        lineHeight: 26,
+        color: COLORS.textPrimary,
+    },
+    body: {
+        fontFamily: FONTS.regular,
+        fontSize: 15,
+        lineHeight: 22,
+        color: COLORS.textPrimary,
+    },
+    bodySmall: {
+        fontFamily: FONTS.regular,
+        fontSize: 13,
+        lineHeight: 20,
+        color: COLORS.textSecondary,
+    },
+    caption: {
+        fontFamily: FONTS.medium,
+        fontSize: 11,
+        lineHeight: 16,
+        letterSpacing: 0.5,
+        color: COLORS.textMuted,
+        textTransform: 'uppercase' as const,
+    },
+    button: {
+        fontFamily: FONTS.semiBold,
+        fontSize: 15,
+        letterSpacing: 0.5,
+    },
+};
