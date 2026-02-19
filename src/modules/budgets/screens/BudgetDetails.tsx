@@ -14,7 +14,7 @@ import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/nativ
 import { getBudget, deleteBudget } from '../budget.repository';
 import { listItems } from '../../items/item.repository';
 import ConfirmationModal from '../../../components/ConfirmationModal';
-import { COLORS, FONTS, SHADOWS } from '../../../theme';
+import { COLORS, FONTS, SHADOWS, SPACING, BORDER_RADIUS } from '../../../theme';
 import {
     Edit2,
     Trash2,
@@ -288,15 +288,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        paddingTop: Platform.OS === 'android' ? 48 : 20,
-        paddingBottom: 18,
+        paddingHorizontal: SPACING.screen,
+        paddingTop: Platform.OS === 'android' ? 52 : SPACING.xl,
+        paddingBottom: SPACING.xl,
     },
     backButton: {
-        width: 38,
-        height: 38,
-        borderRadius: 10,
-        backgroundColor: 'rgba(255,255,255,0.15)',
+        width: 40,
+        height: 40,
+        borderRadius: BORDER_RADIUS.md,
+        backgroundColor: 'rgba(255,255,255,0.14)',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -306,12 +306,13 @@ const styles = StyleSheet.create({
         color: COLORS.white,
         flex: 1,
         textAlign: 'center',
-        marginHorizontal: 8,
+        marginHorizontal: SPACING.sm,
+        letterSpacing: -0.2,
     },
 
     scrollContent: {
-        padding: 20,
-        paddingBottom: 40,
+        padding: SPACING.screen,
+        paddingBottom: 48,
     },
 
     // Status Banner
@@ -319,63 +320,64 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 16,
-        borderRadius: 16,
-        marginBottom: 24,
-        gap: 8,
+        paddingVertical: 14,
+        borderRadius: BORDER_RADIUS.lg,
+        marginBottom: SPACING.section,
+        gap: SPACING.sm,
     },
     statusBannerText: {
-        fontFamily: FONTS.extraBold,
-        fontSize: 15,
+        fontFamily: FONTS.bold,
+        fontSize: 14,
         textTransform: 'uppercase',
-        letterSpacing: 1,
+        letterSpacing: 0.8,
     },
 
     // Cards
     card: {
         backgroundColor: COLORS.card,
-        borderRadius: 20,
-        padding: 24,
-        marginBottom: 20,
+        borderRadius: BORDER_RADIUS.xl,
+        padding: SPACING.cardLg,
+        marginBottom: SPACING.lg,
         ...SHADOWS.card,
     },
     cardSectionTitle: {
         fontFamily: FONTS.bold,
-        fontSize: 17,
+        fontSize: 16,
         color: COLORS.primary,
-        marginBottom: 20,
+        marginBottom: SPACING.lg,
         letterSpacing: -0.3,
     },
 
     // Info Items
     infoItem: {
-        marginBottom: 4,
+        marginBottom: SPACING.xs,
     },
     label: {
         fontFamily: FONTS.semiBold,
-        fontSize: 11,
-        color: COLORS.textSecondary,
-        marginBottom: 6,
-        letterSpacing: 0.8,
+        fontSize: 10,
+        color: COLORS.textMuted,
+        marginBottom: 5,
+        letterSpacing: 0.9,
         textTransform: 'uppercase',
     },
     value: {
         fontFamily: FONTS.semiBold,
         fontSize: 16,
         color: COLORS.textPrimary,
+        lineHeight: 22,
     },
     valueRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
+        gap: SPACING.sm,
     },
 
     // Dates
     dateRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
-        paddingVertical: 4,
+        gap: SPACING.md,
+        paddingVertical: SPACING.xs,
     },
     dateValue: {
         fontFamily: FONTS.semiBold,
@@ -385,29 +387,29 @@ const styles = StyleSheet.create({
     dateValueRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
+        gap: SPACING.sm,
     },
 
     divider: {
         height: 1,
-        backgroundColor: COLORS.border,
-        marginVertical: 16,
+        backgroundColor: COLORS.divider,
+        marginVertical: SPACING.lg,
     },
 
     // Buttons
     actionsContainer: {
         flexDirection: 'row',
-        gap: 16,
-        marginTop: 8,
+        gap: SPACING.md,
+        marginTop: SPACING.sm,
     },
     btn: {
         flex: 1,
         flexDirection: 'row',
-        height: 56,
-        borderRadius: 16,
+        height: 54,
+        borderRadius: BORDER_RADIUS.lg,
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 10,
+        gap: SPACING.sm,
         ...SHADOWS.button,
     },
     btnEdit: {
@@ -416,22 +418,22 @@ const styles = StyleSheet.create({
     btnDelete: {
         backgroundColor: COLORS.card,
         borderWidth: 1,
-        borderColor: COLORS.error, // Red border
+        borderColor: COLORS.error,
         shadowColor: COLORS.error,
-        shadowOpacity: 0.1,
+        shadowOpacity: 0.08,
     },
     btnText: {
-        fontFamily: FONTS.bold,
-        fontSize: 16,
+        fontFamily: FONTS.semiBold,
+        fontSize: 15,
         color: COLORS.white,
     },
 
     // Items Card
     itemsCard: {
         backgroundColor: COLORS.card,
-        borderRadius: 20,
-        padding: 20,
-        marginBottom: 20,
+        borderRadius: BORDER_RADIUS.xl,
+        padding: SPACING.card,
+        marginBottom: SPACING.lg,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -440,27 +442,27 @@ const styles = StyleSheet.create({
     itemsCardLeft: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 14,
+        gap: SPACING.md,
         flex: 1,
     },
     itemsIconBox: {
-        width: 48,
-        height: 48,
-        borderRadius: 14,
+        width: 46,
+        height: 46,
+        borderRadius: BORDER_RADIUS.md,
         backgroundColor: '#EFF6FF',
         alignItems: 'center',
         justifyContent: 'center',
     },
     itemsCardTitle: {
-        fontFamily: FONTS.bold,
-        fontSize: 16,
+        fontFamily: FONTS.semiBold,
+        fontSize: 15,
         color: COLORS.textPrimary,
-        marginBottom: 2,
+        marginBottom: 3,
     },
     itemsCardSub: {
         fontFamily: FONTS.regular,
         fontSize: 13,
         color: COLORS.textSecondary,
+        lineHeight: 18,
     },
 });
-

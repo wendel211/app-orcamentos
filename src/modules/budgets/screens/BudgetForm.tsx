@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { createBudget, updateBudget, getBudget } from '../budget.repository';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { COLORS, FONTS, SHADOWS } from '../../../theme';
+import { COLORS, FONTS, SHADOWS, SPACING, BORDER_RADIUS } from '../../../theme';
 import {
     Check,
     ChevronLeft,
@@ -262,15 +262,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        paddingTop: Platform.OS === 'android' ? 48 : 20,
-        paddingBottom: 18,
+        paddingHorizontal: SPACING.screen,
+        paddingTop: Platform.OS === 'android' ? 52 : SPACING.xl,
+        paddingBottom: SPACING.xl,
     },
     backButton: {
-        width: 38,
-        height: 38,
-        borderRadius: 10,
-        backgroundColor: 'rgba(255,255,255,0.15)',
+        width: 40,
+        height: 40,
+        borderRadius: BORDER_RADIUS.md,
+        backgroundColor: 'rgba(255,255,255,0.14)',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -278,39 +278,41 @@ const styles = StyleSheet.create({
         fontFamily: FONTS.bold,
         fontSize: 18,
         color: COLORS.white,
+        letterSpacing: -0.2,
     },
 
     scrollContent: {
-        padding: 20,
-        paddingBottom: 40,
+        padding: SPACING.screen,
+        paddingBottom: 48,
     },
 
     // Card
     card: {
         backgroundColor: COLORS.card,
-        borderRadius: 20,
-        padding: 24,
-        marginBottom: 24,
+        borderRadius: BORDER_RADIUS.xl,
+        padding: SPACING.cardLg,
+        marginBottom: SPACING.section,
         ...SHADOWS.card,
     },
     sectionTitle: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: COLORS.textSecondary,
-        marginBottom: 16,
+        fontFamily: FONTS.semiBold,
+        fontSize: 10,
+        color: COLORS.textMuted,
+        marginBottom: SPACING.lg,
         letterSpacing: 1,
+        textTransform: 'uppercase',
     },
 
     // Inputs
     inputGroup: {
-        marginBottom: 20,
+        marginBottom: SPACING.xl,
     },
     label: {
-        fontFamily: FONTS.bold,
-        fontSize: 11,
-        color: COLORS.textSecondary,
-        marginBottom: 8,
-        letterSpacing: 0.8,
+        fontFamily: FONTS.semiBold,
+        fontSize: 10,
+        color: COLORS.textMuted,
+        marginBottom: SPACING.sm,
+        letterSpacing: 0.9,
         textTransform: 'uppercase',
     },
     inputWrapper: {
@@ -319,15 +321,15 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.cardAlt,
         borderBottomWidth: 2,
         borderBottomColor: COLORS.border,
-        paddingHorizontal: 4,
-        height: 50,
+        paddingHorizontal: SPACING.xs,
+        height: 52,
     },
     inputIcon: {
-        marginRight: 12,
+        marginRight: SPACING.md,
     },
     input: {
         flex: 1,
-        fontFamily: FONTS.semiBold,
+        fontFamily: FONTS.medium,
         fontSize: 16,
         color: COLORS.textPrimary,
     },
@@ -336,13 +338,13 @@ const styles = StyleSheet.create({
     statusGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 12,
+        gap: SPACING.md,
     },
     statusCard: {
         width: '48%',
         backgroundColor: '#F8FAFC',
-        padding: 16,
-        borderRadius: 16,
+        padding: SPACING.lg,
+        borderRadius: BORDER_RADIUS.lg,
         alignItems: 'center',
         borderWidth: 1,
         borderColor: COLORS.border,
@@ -352,20 +354,21 @@ const styles = StyleSheet.create({
     iconBox: {
         width: 40,
         height: 40,
-        borderRadius: 12,
+        borderRadius: BORDER_RADIUS.md,
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 8,
+        marginBottom: SPACING.sm,
     },
     statusLabel: {
         fontFamily: FONTS.semiBold,
         fontSize: 13,
         color: COLORS.textSecondary,
+        letterSpacing: -0.1,
     },
     checkBadge: {
         position: 'absolute',
-        top: 8,
-        right: 8,
+        top: SPACING.sm,
+        right: SPACING.sm,
         backgroundColor: COLORS.primary,
         width: 20,
         height: 20,
@@ -378,11 +381,11 @@ const styles = StyleSheet.create({
     saveBtn: {
         flexDirection: 'row',
         backgroundColor: COLORS.primary,
-        paddingVertical: 20,
-        borderRadius: 16,
+        paddingVertical: 18,
+        borderRadius: BORDER_RADIUS.lg,
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 12,
+        gap: SPACING.md,
         ...SHADOWS.button,
     },
     saveBtnDisabled: {
@@ -390,8 +393,9 @@ const styles = StyleSheet.create({
         shadowOpacity: 0,
     },
     saveBtnText: {
-        fontFamily: FONTS.bold,
+        fontFamily: FONTS.semiBold,
         color: COLORS.white,
-        fontSize: 17,
+        fontSize: 16,
+        letterSpacing: 0.2,
     },
 });

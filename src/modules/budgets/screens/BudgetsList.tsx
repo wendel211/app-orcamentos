@@ -280,55 +280,59 @@ const styles = StyleSheet.create({
     // Header — dark navy
     header: {
         backgroundColor: COLORS.primary,
-        paddingHorizontal: SPACING.xl,
-        paddingTop: Platform.OS === 'android' ? SPACING.xxxl : SPACING.xl,
-        paddingBottom: SPACING.xl,
+        paddingHorizontal: SPACING.screen,
+        paddingTop: Platform.OS === 'android' ? 52 : SPACING.xl,
+        paddingBottom: SPACING.xxl,
         flexDirection: 'row',
         alignItems: 'flex-start',
         justifyContent: 'space-between',
     },
     headerTitle: {
         ...TYPOGRAPHY.display,
-        fontSize: 28,
         color: COLORS.white,
     },
     headerSub: {
         ...TYPOGRAPHY.bodySmall,
-        color: 'rgba(255,255,255,0.7)',
+        color: 'rgba(255,255,255,0.65)',
         marginTop: SPACING.xs,
+        fontFamily: FONTS.regular,
     },
     dashBtn: {
-        width: 48,
-        height: 48,
+        width: 44,
+        height: 44,
         borderRadius: BORDER_RADIUS.md,
-        backgroundColor: 'rgba(255,255,255,0.15)',
+        backgroundColor: 'rgba(255,255,255,0.14)',
         alignItems: 'center',
         justifyContent: 'center',
     },
 
-    // Stats row — white card attached to header
+    // Stats row — white card overlapping header
     statsRow: {
         backgroundColor: COLORS.card,
         flexDirection: 'row',
-        marginHorizontal: SPACING.lg,
-        marginTop: -SPACING.xl,
-        borderRadius: BORDER_RADIUS.lg,
+        marginHorizontal: SPACING.screen,
+        marginTop: -20,
+        borderRadius: BORDER_RADIUS.xl,
         paddingVertical: SPACING.lg,
-        paddingHorizontal: SPACING.md,
+        paddingHorizontal: SPACING.sm,
         ...SHADOWS.cardMd,
-        marginBottom: SPACING.xl,
+        marginBottom: SPACING.xxl,
     },
     statCard: {
         flex: 1,
         alignItems: 'center',
+        gap: 4,
     },
     statValue: {
-        ...TYPOGRAPHY.h2,
+        fontFamily: FONTS.extraBold,
+        fontSize: 22,
+        lineHeight: 26,
+        letterSpacing: -0.5,
         color: COLORS.textPrimary,
     },
     statLabel: {
-        ...TYPOGRAPHY.caption,
-        marginTop: SPACING.xs,
+        ...TYPOGRAPHY.label,
+        color: COLORS.textMuted,
     },
     statDivider: {
         width: 1,
@@ -340,7 +344,7 @@ const styles = StyleSheet.create({
     toolbar: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: SPACING.lg,
+        paddingHorizontal: SPACING.screen,
         gap: SPACING.md,
         marginBottom: SPACING.lg,
     },
@@ -349,9 +353,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: COLORS.card,
-        borderRadius: BORDER_RADIUS.md,
+        borderRadius: BORDER_RADIUS.lg,
         paddingHorizontal: SPACING.md,
-        paddingVertical: 12,
+        paddingVertical: 13,
         gap: SPACING.sm,
         ...SHADOWS.card,
     },
@@ -359,11 +363,12 @@ const styles = StyleSheet.create({
         flex: 1,
         ...TYPOGRAPHY.body,
         padding: 0,
+        color: COLORS.textPrimary,
     },
     addBtn: {
-        width: 48,
-        height: 48,
-        borderRadius: BORDER_RADIUS.md,
+        width: 50,
+        height: 50,
+        borderRadius: BORDER_RADIUS.lg,
         backgroundColor: COLORS.primary,
         alignItems: 'center',
         justifyContent: 'center',
@@ -372,60 +377,61 @@ const styles = StyleSheet.create({
 
     // Section label
     sectionLabel: {
-        ...TYPOGRAPHY.caption,
-        paddingHorizontal: SPACING.xl,
-        marginBottom: SPACING.md,
+        ...TYPOGRAPHY.label,
+        paddingHorizontal: SPACING.screen,
+        marginBottom: SPACING.sm,
     },
 
     // List
     listContent: {
-        paddingBottom: 100,
-        paddingHorizontal: SPACING.lg,
+        paddingBottom: 110,
+        paddingHorizontal: SPACING.screen,
     },
 
     // Card
     card: {
         backgroundColor: COLORS.card,
-        borderRadius: BORDER_RADIUS.lg,
+        borderRadius: BORDER_RADIUS.xl,
         marginBottom: SPACING.md,
         flexDirection: 'row',
         overflow: 'hidden',
         ...SHADOWS.card,
     },
     cardAccent: {
-        width: 6,
+        width: 5,
     },
     cardContent: {
         flex: 1,
-        padding: SPACING.lg,
+        padding: SPACING.card,
     },
     cardTop: {
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'space-between',
         marginBottom: SPACING.md,
+        gap: SPACING.sm,
     },
     cardTitle: {
         ...TYPOGRAPHY.h3,
-        fontSize: 17,
         flex: 1,
-        marginRight: SPACING.sm,
     },
     badge: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: SPACING.sm,
         paddingVertical: 4,
-        borderRadius: BORDER_RADIUS.sm,
+        borderRadius: BORDER_RADIUS.pill,
         gap: 4,
+        flexShrink: 0,
     },
     badgeText: {
-        fontFamily: FONTS.bold,
-        fontSize: 11,
+        fontFamily: FONTS.semiBold,
+        fontSize: 10,
+        letterSpacing: 0.3,
         textTransform: 'uppercase',
     },
     metaContainer: {
-        gap: SPACING.xs,
+        gap: 6,
         marginBottom: SPACING.md,
     },
     metaRow: {
@@ -434,13 +440,15 @@ const styles = StyleSheet.create({
         gap: SPACING.sm,
     },
     metaText: {
-        ...TYPOGRAPHY.bodySmall,
+        fontFamily: FONTS.regular,
+        fontSize: 13,
+        lineHeight: 18,
+        color: COLORS.textSecondary,
     },
     cardFooter: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginTop: SPACING.sm,
         paddingTop: SPACING.md,
         borderTopWidth: 1,
         borderTopColor: COLORS.divider,
@@ -448,7 +456,7 @@ const styles = StyleSheet.create({
     deleteBtn: {
         paddingHorizontal: SPACING.md,
         paddingVertical: 6,
-        borderRadius: BORDER_RADIUS.sm,
+        borderRadius: BORDER_RADIUS.md,
         backgroundColor: COLORS.errorBg,
     },
     deleteBtnText: {
@@ -459,7 +467,7 @@ const styles = StyleSheet.create({
     detailsHint: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 2,
+        gap: 4,
     },
     detailsHintText: {
         fontFamily: FONTS.semiBold,
@@ -470,7 +478,7 @@ const styles = StyleSheet.create({
     // Empty state
     emptyBox: {
         alignItems: 'center',
-        paddingVertical: SPACING.xxxl,
+        paddingVertical: 64,
         gap: SPACING.md,
     },
     emptyIcon: {
