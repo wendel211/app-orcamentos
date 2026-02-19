@@ -14,7 +14,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { listBudgets } from '../budget.repository';
 import { syncData } from '../../sync/sync.service';
 import ConfirmationModal from '../../../components/ConfirmationModal';
-import { COLORS, FONTS, SHADOWS } from '../../../theme';
+import { COLORS, FONTS, SHADOWS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../../theme';
 import {
     Plus,
     Calendar,
@@ -116,7 +116,7 @@ export default function BudgetsList() {
                     onPress={() => (navigation as any).navigate('Dashboard')}
                     style={({ pressed }) => [styles.dashBtn, pressed && { opacity: 0.7 }]}
                 >
-                    <BarChart2 size={20} color={COLORS.white} />
+                    <BarChart2 size={24} color={COLORS.white} />
                 </Pressable>
             </View>
 
@@ -141,7 +141,7 @@ export default function BudgetsList() {
             {/* Search + New Button */}
             <View style={styles.toolbar}>
                 <View style={styles.searchWrapper}>
-                    <Search size={16} color={COLORS.textSecondary} />
+                    <Search size={20} color={COLORS.textSecondary} />
                     <TextInput
                         value={search}
                         onChangeText={setSearch}
@@ -152,7 +152,7 @@ export default function BudgetsList() {
                     />
                     {search.length > 0 && (
                         <Pressable onPress={() => setSearch('')} hitSlop={8}>
-                            <X size={16} color={COLORS.textSecondary} />
+                            <X size={20} color={COLORS.textSecondary} />
                         </Pressable>
                     )}
                 </View>
@@ -160,7 +160,7 @@ export default function BudgetsList() {
                     onPress={() => (navigation as any).navigate('BudgetForm')}
                     style={({ pressed }) => [styles.addBtn, pressed && { opacity: 0.85 }]}
                 >
-                    <Plus size={20} color={COLORS.white} strokeWidth={2.5} />
+                    <Plus size={24} color={COLORS.white} strokeWidth={2.5} />
                 </Pressable>
             </View>
 
@@ -176,13 +176,13 @@ export default function BudgetsList() {
                 data={filtered}
                 keyExtractor={(item) => item.id}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: 16 }}
+                contentContainerStyle={styles.listContent}
                 refreshing={refreshing}
                 onRefresh={handleRefresh}
                 ListEmptyComponent={
                     <View style={styles.emptyBox}>
                         <View style={styles.emptyIcon}>
-                            <FileText size={32} color={COLORS.textMuted} />
+                            <FileText size={40} color={COLORS.textMuted} />
                         </View>
                         <Text style={styles.emptyText}>
                             {query ? 'Nenhum resultado' : 'Nenhum orçamento ainda'}
@@ -212,7 +212,7 @@ export default function BudgetsList() {
                                 <View style={styles.cardTop}>
                                     <Text style={styles.cardTitle} numberOfLines={1}>{item.title}</Text>
                                     <View style={[styles.badge, { backgroundColor: status.bg }]}>
-                                        <StatusIcon size={11} color={status.color} strokeWidth={2.5} />
+                                        <StatusIcon size={12} color={status.color} strokeWidth={2.5} />
                                         <Text style={[styles.badgeText, { color: status.color }]}>
                                             {status.label}
                                         </Text>
@@ -220,33 +220,35 @@ export default function BudgetsList() {
                                 </View>
 
                                 {/* Meta info */}
-                                <View style={styles.metaRow}>
-                                    <User size={13} color={COLORS.textSecondary} />
-                                    <Text style={styles.metaText}>{item.client_name}</Text>
-                                </View>
-                                <View style={styles.metaRow}>
-                                    <Calendar size={13} color={COLORS.textSecondary} />
-                                    <Text style={styles.metaText}>{formatDate(item.created_at)}</Text>
-                                </View>
-                                {item.address && (
+                                <View style={styles.metaContainer}>
                                     <View style={styles.metaRow}>
-                                        <MapPin size={13} color={COLORS.textSecondary} />
-                                        <Text style={styles.metaText} numberOfLines={1}>{item.address}</Text>
+                                        <User size={14} color={COLORS.textSecondary} />
+                                        <Text style={styles.metaText}>{item.client_name}</Text>
                                     </View>
-                                )}
+                                    <View style={styles.metaRow}>
+                                        <Calendar size={14} color={COLORS.textSecondary} />
+                                        <Text style={styles.metaText}>{formatDate(item.created_at)}</Text>
+                                    </View>
+                                    {item.address && (
+                                        <View style={styles.metaRow}>
+                                            <MapPin size={14} color={COLORS.textSecondary} />
+                                            <Text style={styles.metaText} numberOfLines={1}>{item.address}</Text>
+                                        </View>
+                                    )}
+                                </View>
 
                                 {/* Footer */}
                                 <View style={styles.cardFooter}>
                                     <Pressable
                                         onPress={() => handleDeletePress(item)}
                                         style={({ pressed }) => [styles.deleteBtn, pressed && { opacity: 0.7 }]}
-                                        hitSlop={6}
+                                        hitSlop={8}
                                     >
                                         <Text style={styles.deleteBtnText}>Excluir</Text>
                                     </Pressable>
                                     <View style={styles.detailsHint}>
                                         <Text style={styles.detailsHintText}>Ver detalhes</Text>
-                                        <ChevronRight size={14} color={COLORS.accent} />
+                                        <ChevronRight size={16} color={COLORS.accent} />
                                     </View>
                                 </View>
                             </View>
@@ -273,104 +275,95 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: COLORS.background,
-        paddingTop: Platform.OS === 'android' ? 0 : 0,
     },
 
     // Header — dark navy
     header: {
         backgroundColor: COLORS.primary,
-        paddingHorizontal: 20,
-        paddingTop: Platform.OS === 'android' ? 48 : 20,
-        paddingBottom: 20,
+        paddingHorizontal: SPACING.xl,
+        paddingTop: Platform.OS === 'android' ? SPACING.xxxl : SPACING.xl,
+        paddingBottom: SPACING.xl,
         flexDirection: 'row',
         alignItems: 'flex-start',
         justifyContent: 'space-between',
     },
     headerTitle: {
-        fontFamily: FONTS.bold,
-        fontSize: 26,
+        ...TYPOGRAPHY.display,
+        fontSize: 28,
         color: COLORS.white,
-        letterSpacing: -0.5,
     },
     headerSub: {
-        fontFamily: FONTS.regular,
-        fontSize: 13,
-        color: 'rgba(255,255,255,0.65)',
-        marginTop: 2,
+        ...TYPOGRAPHY.bodySmall,
+        color: 'rgba(255,255,255,0.7)',
+        marginTop: SPACING.xs,
     },
     dashBtn: {
-        width: 40,
-        height: 40,
-        borderRadius: 12,
+        width: 48,
+        height: 48,
+        borderRadius: BORDER_RADIUS.md,
         backgroundColor: 'rgba(255,255,255,0.15)',
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 4,
     },
 
     // Stats row — white card attached to header
     statsRow: {
         backgroundColor: COLORS.card,
         flexDirection: 'row',
-        marginHorizontal: 16,
-        marginTop: -1,
-        borderRadius: 16,
-        paddingVertical: 16,
-        paddingHorizontal: 8,
+        marginHorizontal: SPACING.lg,
+        marginTop: -SPACING.xl,
+        borderRadius: BORDER_RADIUS.lg,
+        paddingVertical: SPACING.lg,
+        paddingHorizontal: SPACING.md,
         ...SHADOWS.cardMd,
-        marginBottom: 16,
+        marginBottom: SPACING.xl,
     },
     statCard: {
         flex: 1,
         alignItems: 'center',
     },
     statValue: {
-        fontFamily: FONTS.bold,
-        fontSize: 22,
+        ...TYPOGRAPHY.h2,
         color: COLORS.textPrimary,
     },
     statLabel: {
-        fontFamily: FONTS.medium,
-        fontSize: 12,
-        color: COLORS.textSecondary,
-        marginTop: 2,
+        ...TYPOGRAPHY.caption,
+        marginTop: SPACING.xs,
     },
     statDivider: {
         width: 1,
         backgroundColor: COLORS.border,
-        marginVertical: 4,
+        marginVertical: SPACING.xs,
     },
 
     // Toolbar
     toolbar: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 16,
-        gap: 10,
-        marginBottom: 12,
+        paddingHorizontal: SPACING.lg,
+        gap: SPACING.md,
+        marginBottom: SPACING.lg,
     },
     searchWrapper: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: COLORS.card,
-        borderRadius: 12,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        gap: 8,
+        borderRadius: BORDER_RADIUS.md,
+        paddingHorizontal: SPACING.md,
+        paddingVertical: 12,
+        gap: SPACING.sm,
         ...SHADOWS.card,
     },
     searchInput: {
         flex: 1,
-        fontFamily: FONTS.regular,
-        fontSize: 14,
-        color: COLORS.textPrimary,
+        ...TYPOGRAPHY.body,
         padding: 0,
     },
     addBtn: {
-        width: 44,
-        height: 44,
-        borderRadius: 12,
+        width: 48,
+        height: 48,
+        borderRadius: BORDER_RADIUS.md,
         backgroundColor: COLORS.primary,
         alignItems: 'center',
         justifyContent: 'center',
@@ -379,81 +372,83 @@ const styles = StyleSheet.create({
 
     // Section label
     sectionLabel: {
-        fontFamily: FONTS.semiBold,
-        fontSize: 11,
-        color: COLORS.textSecondary,
-        letterSpacing: 0.8,
-        textTransform: 'uppercase',
-        paddingHorizontal: 20,
-        marginBottom: 10,
+        ...TYPOGRAPHY.caption,
+        paddingHorizontal: SPACING.xl,
+        marginBottom: SPACING.md,
+    },
+
+    // List
+    listContent: {
+        paddingBottom: 100,
+        paddingHorizontal: SPACING.lg,
     },
 
     // Card
     card: {
         backgroundColor: COLORS.card,
-        borderRadius: 16,
-        marginBottom: 12,
+        borderRadius: BORDER_RADIUS.lg,
+        marginBottom: SPACING.md,
         flexDirection: 'row',
         overflow: 'hidden',
         ...SHADOWS.card,
     },
     cardAccent: {
-        width: 4,
+        width: 6,
     },
     cardContent: {
         flex: 1,
-        padding: 16,
+        padding: SPACING.lg,
     },
     cardTop: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: 10,
+        marginBottom: SPACING.md,
     },
     cardTitle: {
-        fontFamily: FONTS.bold,
-        fontSize: 15,
-        color: COLORS.textPrimary,
+        ...TYPOGRAPHY.h3,
+        fontSize: 17,
         flex: 1,
-        marginRight: 8,
+        marginRight: SPACING.sm,
     },
     badge: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        borderRadius: 8,
+        paddingHorizontal: SPACING.sm,
+        paddingVertical: 4,
+        borderRadius: BORDER_RADIUS.sm,
         gap: 4,
     },
     badgeText: {
         fontFamily: FONTS.bold,
         fontSize: 11,
+        textTransform: 'uppercase',
+    },
+    metaContainer: {
+        gap: SPACING.xs,
+        marginBottom: SPACING.md,
     },
     metaRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 6,
-        marginBottom: 4,
+        gap: SPACING.sm,
     },
     metaText: {
-        fontFamily: FONTS.regular,
-        fontSize: 13,
-        color: COLORS.textSecondary,
-        flex: 1,
+        ...TYPOGRAPHY.bodySmall,
     },
     cardFooter: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginTop: 10,
-        paddingTop: 10,
+        marginTop: SPACING.sm,
+        paddingTop: SPACING.md,
         borderTopWidth: 1,
         borderTopColor: COLORS.divider,
     },
     deleteBtn: {
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 8,
+        paddingHorizontal: SPACING.md,
+        paddingVertical: 6,
+        borderRadius: BORDER_RADIUS.sm,
         backgroundColor: COLORS.errorBg,
     },
     deleteBtnText: {
@@ -468,34 +463,31 @@ const styles = StyleSheet.create({
     },
     detailsHintText: {
         fontFamily: FONTS.semiBold,
-        fontSize: 12,
+        fontSize: 13,
         color: COLORS.accent,
     },
 
     // Empty state
     emptyBox: {
         alignItems: 'center',
-        paddingVertical: 60,
-        gap: 12,
+        paddingVertical: SPACING.xxxl,
+        gap: SPACING.md,
     },
     emptyIcon: {
-        width: 72,
-        height: 72,
-        borderRadius: 20,
+        width: 80,
+        height: 80,
+        borderRadius: BORDER_RADIUS.xl,
         backgroundColor: COLORS.card,
         alignItems: 'center',
         justifyContent: 'center',
         ...SHADOWS.card,
     },
     emptyText: {
-        fontFamily: FONTS.bold,
-        fontSize: 17,
-        color: COLORS.textPrimary,
+        ...TYPOGRAPHY.h3,
+        textAlign: 'center',
     },
     emptySubtext: {
-        fontFamily: FONTS.regular,
-        fontSize: 14,
-        color: COLORS.textSecondary,
+        ...TYPOGRAPHY.bodySmall,
         textAlign: 'center',
     },
 });
