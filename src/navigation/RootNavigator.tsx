@@ -6,14 +6,21 @@ import BudgetForm from '../modules/budgets/screens/BudgetForm';
 import BudgetDetails from '../modules/budgets/screens/BudgetDetails';
 import BudgetItems from '../modules/budgets/screens/BudgetItems';
 import Dashboard from '../modules/budgets/screens/Dashboard';
+import LoginScreen from '../modules/auth/screens/LoginScreen';
+import RegisterScreen from '../modules/auth/screens/RegisterScreen';
 import { COLORS } from '../theme';
 
 const Stack = createNativeStackNavigator();
 
 export default function RootNavigator() {
+    // For now, we will show the Auth flow first. 
+    // In Phase 3, we will add more robust logic to check if user is logged in.
+    const isAuthenticated = false;
+
     return (
         <NavigationContainer>
             <Stack.Navigator
+                initialRouteName={isAuthenticated ? "BudgetsList" : "Login"}
                 screenOptions={{
                     headerStyle: {
                         backgroundColor: COLORS.primary,
@@ -29,31 +36,48 @@ export default function RootNavigator() {
                     },
                 }}
             >
-                <Stack.Screen
-                    name="BudgetsList"
-                    component={BudgetsList}
-                    options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                    name="BudgetForm"
-                    component={BudgetForm}
-                    options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                    name="BudgetDetails"
-                    component={BudgetDetails}
-                    options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                    name="BudgetItems"
-                    component={BudgetItems}
-                    options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                    name="Dashboard"
-                    component={Dashboard}
-                    options={{ headerShown: false }}
-                />
+                {!isAuthenticated ? (
+                    <>
+                        <Stack.Screen
+                            name="Login"
+                            component={LoginScreen}
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name="Register"
+                            component={RegisterScreen}
+                            options={{ headerShown: false }}
+                        />
+                    </>
+                ) : (
+                    <>
+                        <Stack.Screen
+                            name="BudgetsList"
+                            component={BudgetsList}
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name="BudgetForm"
+                            component={BudgetForm}
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name="BudgetDetails"
+                            component={BudgetDetails}
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name="BudgetItems"
+                            component={BudgetItems}
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name="Dashboard"
+                            component={Dashboard}
+                            options={{ headerShown: false }}
+                        />
+                    </>
+                )}
             </Stack.Navigator>
         </NavigationContainer>
     );
