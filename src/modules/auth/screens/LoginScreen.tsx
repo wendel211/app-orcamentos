@@ -12,11 +12,31 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../../../theme';
+import { useAuth } from '../contexts/AuthContext';
+import { Alert, ActivityIndicator } from 'react-native';
 
 const LoginScreen = ({ navigation }: any) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const { signIn } = useAuth();
+
+    const handleLogin = async () => {
+        if (!email || !password) {
+            Alert.alert('Erro', 'Por favor, preencha todos os campos.');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            await signIn(email, password);
+        } catch (error: any) {
+            Alert.alert('Erro de Login', error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -76,15 +96,15 @@ const LoginScreen = ({ navigation }: any) => {
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            style={styles.loginButton}
-                            onPress={() => {/* In Phase 3 we will add auth logic */ }}
+                            style={[styles.loginButton, loading && { opacity: 0.7 }]}
+                            onPress={handleLogin}
+                            disabled={loading}
                         >
-                            <Text style={styles.loginButtonText}>Entrar</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.googleButton}>
-                            <Ionicons name="logo-google" size={20} color={COLORS.primary} style={{ marginRight: 10 }} />
-                            <Text style={styles.googleButtonText}>Login com Google</Text>
+                            {loading ? (
+                                <ActivityIndicator color={COLORS.white} />
+                            ) : (
+                                <Text style={styles.loginButtonText}>Entrar</Text>
+                            )}
                         </TouchableOpacity>
                     </View>
 
@@ -176,12 +196,13 @@ const styles = StyleSheet.create({
         color: COLORS.textSecondary,
     },
     loginButton: {
-        backgroundColor: COLORS.accent,
+        backgroundColor: COLORS.primary,
         height: 56,
         borderRadius: BORDER_RADIUS.md,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: SPACING.lg,
+        marginTop: SPACING.md,
+        marginBottom: SPACING.xl,
         ...SHADOWS.button,
     },
     loginButtonText: {

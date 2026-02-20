@@ -12,6 +12,7 @@ import {
   Inter_800ExtraBold,
 } from '@expo-google-fonts/inter';
 import SplashScreen from './src/modules/common/screens/SplashScreen';
+import { AuthProvider } from './src/modules/auth/contexts/AuthContext';
 
 export default function App() {
   const [dbReady, setDbReady] = useState(false);
@@ -40,5 +41,9 @@ export default function App() {
     return <SplashScreen />;
   }
 
-  return <RootNavigator />;
+  return (
+    <AuthProvider>
+      <RootNavigator />
+    </AuthProvider>
+  );
 }

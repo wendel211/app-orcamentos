@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../../../theme';
+import { useAuth } from '../contexts/AuthContext';
+import { Alert, ActivityIndicator } from 'react-native';
 
 const RegisterScreen = ({ navigation }: any) => {
     const [name, setName] = useState('');
@@ -19,6 +21,34 @@ const RegisterScreen = ({ navigation }: any) => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const { signUp } = useAuth();
+
+    const handleRegister = async () => {
+        if (!name || !email || !password || !confirmPassword) {
+            Alert.alert('Erro', 'Por favor, preencha todos os campos.');
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            Alert.alert('Erro', 'As senhas não conferem.');
+            return;
+        }
+
+        if (password.length < 6) {
+            Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres.');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            await signUp(email, password, name);
+        } catch (error: any) {
+            Alert.alert('Erro de Cadastro', error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -102,10 +132,15 @@ const RegisterScreen = ({ navigation }: any) => {
                         </View>
 
                         <TouchableOpacity
-                            style={styles.registerButton}
-                            onPress={() => {/* In Phase 3 we will add auth logic */ }}
+                            style={[styles.registerButton, loading && { opacity: 0.7 }]}
+                            onPress={handleRegister}
+                            disabled={loading}
                         >
-                            <Text style={styles.registerButtonText}>Cadastrar</Text>
+                            {loading ? (
+                                <ActivityIndicator color={COLORS.white} />
+                            ) : (
+                                <Text style={styles.registerButtonText}>Cadastrar</Text>
+                            )}
                         </TouchableOpacity>
                     </View>
 

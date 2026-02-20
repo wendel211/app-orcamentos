@@ -8,14 +8,23 @@ import BudgetItems from '../modules/budgets/screens/BudgetItems';
 import Dashboard from '../modules/budgets/screens/Dashboard';
 import LoginScreen from '../modules/auth/screens/LoginScreen';
 import RegisterScreen from '../modules/auth/screens/RegisterScreen';
+import { useAuth } from '../modules/auth/contexts/AuthContext';
 import { COLORS } from '../theme';
+import { ActivityIndicator, View } from 'react-native';
 
 const Stack = createNativeStackNavigator();
 
 export default function RootNavigator() {
-    // For now, we will show the Auth flow first. 
-    // In Phase 3, we will add more robust logic to check if user is logged in.
-    const isAuthenticated = false;
+    const { user, loading } = useAuth();
+    const isAuthenticated = !!user;
+
+    if (loading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.background }}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+            </View>
+        );
+    }
 
     return (
         <NavigationContainer>
