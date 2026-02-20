@@ -1,5 +1,14 @@
 import axios from 'axios';
 
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
+if (!apiUrl) {
+    throw new Error(
+        'EXPO_PUBLIC_API_URL não definida. ' +
+        'Crie o arquivo .env.development (dev) ou .env.production (prod).'
+    );
+}
+
 export const api = axios.create({
-    baseURL: process.env.EXPO_PUBLIC_API_URL || 'http://10.0.0.182:3000/api'
+    baseURL: apiUrl,
 });
