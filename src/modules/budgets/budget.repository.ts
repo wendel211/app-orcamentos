@@ -3,6 +3,7 @@ import * as Crypto from 'expo-crypto';
 import { Budget } from './budget.types';
 
 export async function createBudget(data: {
+    user_id: string;
     title: string;
     client_name: string;
     address?: string;
@@ -15,10 +16,11 @@ export async function createBudget(data: {
 
     await db.runAsync(
         `INSERT INTO budgets 
-     (id,title,client_name,address,discount,extra_fee,created_at,updated_at,synced,status)
-     VALUES (?,?,?,?,?,?,?,?,0,?)`,
+     (id,user_id,title,client_name,address,discount,extra_fee,created_at,updated_at,synced,status)
+     VALUES (?,?,?,?,?,?,?,?,?,0,?)`,
         [
             id,
+            data.user_id,
             data.title,
             data.client_name,
             data.address ?? null,
@@ -92,12 +94,13 @@ export async function deleteBudget(id: string) {
     );
 }
 
-export async function listBudgets(): Promise<Budget[]> {
+export async function listBudgets(user_id: string): Promise<Budget[]> {
     const db = getDatabase();
     return db.getAllAsync<Budget>(
         `SELECT * FROM budgets 
-     WHERE deleted_at IS NULL 
-     ORDER BY updated_at DESC`
+     WHERE user_id = ? AND deleted_at IS NULL 
+     ORDER BY updated_at DESC`,
+        user_id
     );
 }
 
@@ -123,12 +126,13 @@ export interface DashboardData {
     recentBudgets: Budget[];
 }
 
-export async function getDashboardData(): Promise<DashboardData> {
+export async function getDashboardData(user_id: string): Promise<DashboardData> {
     const db = getDatabase();
 
     // Status counts
     const counts = await db.getAllAsync<{ status: string; count: number }>(
-        `SELECT status, COUNT(*) as count FROM budgets WHERE deleted_at IS NULL GROUP BY status`
+        `SELECT status, COUNT(*) as count FROM budgets WHERE user_id = ? AND deleted_at IS NULL GROUP BY status`,
+        user_id
     );
 
     const countMap: Record<string, number> = {};
@@ -146,9 +150,11 @@ export async function getDashboardData(): Promise<DashboardData> {
         `SELECT COALESCE(SUM(i.qty * i.unit_price), 0) as total
          FROM items i
          INNER JOIN budgets b ON b.id = i.budget_id
-         WHERE b.status = 'APROVADO'
+         WHERE b.user_id = ?
+           AND b.status = 'APROVADO'
            AND b.deleted_at IS NULL
-           AND i.deleted_at IS NULL`
+           AND i.deleted_at IS NULL`,
+        user_id
     );
     const revenueTotal = revenueRow?.total ?? 0;
     const averageTicket = totalApproved > 0 ? revenueTotal / totalApproved : 0;
@@ -160,11 +166,12 @@ export async function getDashboardData(): Promise<DashboardData> {
         `SELECT COALESCE(SUM(i.qty * i.unit_price), 0) as total
          FROM items i
          INNER JOIN budgets b ON b.id = i.budget_id
-         WHERE b.status = 'APROVADO'
+         WHERE b.user_id = ?
+           AND b.status = 'APROVADO'
            AND b.deleted_at IS NULL
            AND i.deleted_at IS NULL
            AND b.updated_at >= ?`,
-        weekStart.toISOString()
+        [user_id, weekStart.toISOString()]
     );
     const revenueThisWeek = weekRow?.total ?? 0;
 
@@ -175,17 +182,19 @@ export async function getDashboardData(): Promise<DashboardData> {
         `SELECT COALESCE(SUM(i.qty * i.unit_price), 0) as total
          FROM items i
          INNER JOIN budgets b ON b.id = i.budget_id
-         WHERE b.status = 'APROVADO'
+         WHERE b.user_id = ?
+           AND b.status = 'APROVADO'
            AND b.deleted_at IS NULL
            AND i.deleted_at IS NULL
            AND b.updated_at >= ?`,
-        monthStart
+        [user_id, monthStart]
     );
     const revenueThisMonth = monthRow?.total ?? 0;
 
     // Recent budgets (last 5)
     const recentBudgets = await db.getAllAsync<Budget>(
-        `SELECT * FROM budgets WHERE deleted_at IS NULL ORDER BY updated_at DESC LIMIT 5`
+        `SELECT * FROM budgets WHERE user_id = ? AND deleted_at IS NULL ORDER BY updated_at DESC LIMIT 5`,
+        user_id
     );
 
     return {

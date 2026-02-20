@@ -13,6 +13,7 @@ import {
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { getBudget, deleteBudget } from '../budget.repository';
 import { listItems } from '../../items/item.repository';
+import { useAuth } from '../../auth/contexts/AuthContext';
 import ConfirmationModal from '../../../components/ConfirmationModal';
 import { COLORS, FONTS, SHADOWS, SPACING, BORDER_RADIUS } from '../../../theme';
 import {
@@ -29,11 +30,13 @@ import {
     Send,
     ChevronLeft,
     Calculator,
-    ChevronRight
+    ChevronRight,
+    LogOut,
 } from 'lucide-react-native';
 
 export default function BudgetDetails() {
     const navigation = useNavigation();
+    const { user, signOut } = useAuth();
     const route = useRoute();
     const { id } = route.params as any;
     const [budget, setBudget] = useState<any>(null);
@@ -42,9 +45,10 @@ export default function BudgetDetails() {
     const [itemsCount, setItemsCount] = useState(0);
 
     const load = async () => {
+        if (!user) return;
         const result = await getBudget(id);
         setBudget(result);
-        const items = await listItems(id);
+        const items = await listItems(user.id, id);
         const subtotal = items.reduce((s, i) => s + i.qty * i.unit_price, 0);
         const discount = result?.discount ?? 0;
         const extraFee = result?.extra_fee ?? 0;
@@ -55,7 +59,7 @@ export default function BudgetDetails() {
     useFocusEffect(
         useCallback(() => {
             load();
-        }, [id])
+        }, [id, user])
     );
 
     function handleEdit() {
@@ -126,7 +130,15 @@ export default function BudgetDetails() {
                     <ChevronLeft size={24} color={COLORS.white} strokeWidth={2.5} />
                 </Pressable>
                 <Text style={styles.headerTitle} numberOfLines={1}>{budget?.title || 'Detalhes'}</Text>
-                <View style={{ width: 40 }} />
+                <Pressable
+                    onPress={signOut}
+                    style={({ pressed }) => [
+                        styles.logoutBtn,
+                        pressed && { opacity: 0.7 }
+                    ]}
+                >
+                    <LogOut size={22} color={COLORS.error} />
+                </Pressable>
             </View>
 
             <ScrollView
@@ -308,6 +320,14 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginHorizontal: SPACING.sm,
         letterSpacing: -0.2,
+    },
+    logoutBtn: {
+        width: 40,
+        height: 40,
+        borderRadius: BORDER_RADIUS.md,
+        backgroundColor: 'rgba(255,255,255,0.14)',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 
     scrollContent: {

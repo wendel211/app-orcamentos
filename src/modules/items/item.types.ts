@@ -2,6 +2,7 @@ export type ItemType = 'MATERIAL' | 'MAO_DE_OBRA' | 'SERVICO';
 
 export type Item = {
     id: string;
+    user_id?: string;
     budget_id: string;
     type: ItemType;
     name: string;

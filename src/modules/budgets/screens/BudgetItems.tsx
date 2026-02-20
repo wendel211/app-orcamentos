@@ -13,6 +13,7 @@ import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/nativ
 import { COLORS, FONTS, SHADOWS } from '../../../theme';
 import { listItems, createItem, deleteItem } from '../../items/item.repository';
 import { updateBudget, getBudget } from '../budget.repository';
+import { useAuth } from '../../auth/contexts/AuthContext';
 import { Item, ItemType } from '../../items/item.types';
 import ItemFormModal from '../components/ItemFormModal';
 import ConfirmationModal from '../../../components/ConfirmationModal';
@@ -26,6 +27,7 @@ import {
     Tag,
     Percent,
     DollarSign,
+    LogOut,
 } from 'lucide-react-native';
 
 const TYPE_META: Record<ItemType, { label: string; icon: any; color: string; bg: string }> = {
@@ -40,6 +42,7 @@ function fmt(value: number) {
 
 export default function BudgetItems() {
     const navigation = useNavigation();
+    const { user, signOut } = useAuth();
     const route = useRoute();
     const { budgetId } = route.params as { budgetId: string };
 
@@ -50,8 +53,9 @@ export default function BudgetItems() {
     const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
 
     const load = async () => {
+        if (!user) return;
         const [loadedItems, budget] = await Promise.all([
-            listItems(budgetId),
+            listItems(user.id, budgetId),
             getBudget(budgetId),
         ]);
         setItems(loadedItems);
@@ -68,7 +72,8 @@ export default function BudgetItems() {
     );
 
     async function handleAddItem(data: { type: ItemType; name: string; qty: number; unit_price: number }) {
-        await createItem({ budget_id: budgetId, ...data });
+        if (!user) return;
+        await createItem({ user_id: user.id, budget_id: budgetId, ...data });
         setModalVisible(false);
         await load();
     }
@@ -117,12 +122,20 @@ export default function BudgetItems() {
                     <ChevronLeft size={24} color={COLORS.white} strokeWidth={2.5} />
                 </Pressable>
                 <Text style={styles.headerTitle}>Itens & Cálculos</Text>
-                <Pressable
-                    onPress={() => setModalVisible(true)}
-                    style={({ pressed }) => [styles.addBtn, pressed && { opacity: 0.85 }]}
-                >
-                    <Plus size={20} color={COLORS.white} strokeWidth={3} />
-                </Pressable>
+                <View style={styles.headerActions}>
+                    <Pressable
+                        onPress={() => setModalVisible(true)}
+                        style={({ pressed }) => [styles.headerBtn, pressed && { opacity: 0.85 }]}
+                    >
+                        <Plus size={20} color={COLORS.white} strokeWidth={3} />
+                    </Pressable>
+                    <Pressable
+                        onPress={signOut}
+                        style={({ pressed }) => [styles.headerBtn, pressed && { opacity: 0.7 }]}
+                    >
+                        <LogOut size={20} color={COLORS.error} />
+                    </Pressable>
+                </View>
             </View>
 
             <FlatList
@@ -313,7 +326,11 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: COLORS.white,
     },
-    addBtn: {
+    headerActions: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    headerBtn: {
         width: 38,
         height: 38,
         borderRadius: 10,

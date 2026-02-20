@@ -10,6 +10,7 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useAuth } from '../../auth/contexts/AuthContext';
 import { COLORS, FONTS, SHADOWS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../../theme';
 import { getDashboardData, DashboardData } from '../budget.repository';
 import {
@@ -24,6 +25,7 @@ import {
     ChevronLeft,
     Award,
     Target,
+    LogOut,
 } from 'lucide-react-native';
 
 function fmt(value: number) {
@@ -46,12 +48,15 @@ const STATUS_META: Record<string, { label: string; color: string; bg: string; ic
 
 export default function Dashboard() {
     const navigation = useNavigation();
+    const { user, signOut } = useAuth();
     const [data, setData] = useState<DashboardData | null>(null);
 
     useFocusEffect(
         useCallback(() => {
-            getDashboardData().then(setData);
-        }, [])
+            if (user) {
+                getDashboardData(user.id).then(setData);
+            }
+        }, [user])
     );
 
     if (!data) {
@@ -79,7 +84,12 @@ export default function Dashboard() {
                     <Text style={styles.headerTitle}>Dashboard</Text>
                     <Text style={styles.headerSub}>Visão geral dos seus orçamentos</Text>
                 </View>
-                <View style={{ width: 38 }} />
+                <Pressable
+                    onPress={signOut}
+                    style={({ pressed }) => [styles.logoutBtn, pressed && { opacity: 0.7 }]}
+                >
+                    <LogOut size={22} color={COLORS.error} />
+                </Pressable>
             </View>
 
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -241,6 +251,14 @@ const styles = StyleSheet.create({
         paddingBottom: SPACING.xl,
     },
     backBtn: {
+        width: 40,
+        height: 40,
+        borderRadius: BORDER_RADIUS.md,
+        backgroundColor: 'rgba(255,255,255,0.14)',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    logoutBtn: {
         width: 40,
         height: 40,
         borderRadius: BORDER_RADIUS.md,

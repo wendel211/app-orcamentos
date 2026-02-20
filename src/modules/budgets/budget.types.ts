@@ -1,5 +1,6 @@
 export type Budget = {
     id: string;
+    user_id?: string;
     title: string;
     client_name: string;
     address?: string;

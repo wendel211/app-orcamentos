@@ -25,7 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         async function loadStorageData() {
             try {
-                const storagedUser = await SecureStore.getItemAsync('@ConstruApp:user');
+                const storagedUser = await SecureStore.getItemAsync('ConstruApp_user');
 
                 if (storagedUser) {
                     setUser(JSON.parse(storagedUser));
@@ -46,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const userData = response.data;
 
             setUser(userData);
-            await SecureStore.setItemAsync('@ConstruApp:user', JSON.stringify(userData));
+            await SecureStore.setItemAsync('ConstruApp_user', JSON.stringify(userData));
         } catch (error: any) {
             const message = error.response?.data?.error || 'Erro ao entrar. Verifique suas credenciais.';
             throw new Error(message);
@@ -55,19 +55,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     async function signUp(email: string, password: string, name: string) {
         try {
-            const response = await api.post('/auth/register', { email, password, name });
-            const userData = response.data;
-
-            setUser(userData);
-            await SecureStore.setItemAsync('@ConstruApp:user', JSON.stringify(userData));
+            await api.post('/auth/register', { email, password, name });
         } catch (error: any) {
-            const message = error.response?.data?.error || 'Erro ao cadastrar. Tente novamente.';
+            const serverError = error.response?.data?.error;
+            const serverDetails = error.response?.data?.details;
+            const message = serverDetails ? `${serverError}: ${serverDetails}` : (serverError || 'Erro ao cadastrar. Tente novamente.');
             throw new Error(message);
         }
     }
 
     async function signOut() {
-        await SecureStore.deleteItemAsync('@ConstruApp:user');
+        await SecureStore.deleteItemAsync('ConstruApp_user');
         setUser(null);
     }
 

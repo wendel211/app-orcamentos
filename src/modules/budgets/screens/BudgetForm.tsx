@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { createBudget, updateBudget, getBudget } from '../budget.repository';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useAuth } from '../../auth/contexts/AuthContext';
 import { COLORS, FONTS, SHADOWS, SPACING, BORDER_RADIUS } from '../../../theme';
 import {
     Check,
@@ -24,7 +25,8 @@ import {
     Clock,
     AlertCircle,
     CheckCircle,
-    Send
+    Send,
+    LogOut,
 } from 'lucide-react-native';
 
 const STATUS_OPTIONS = [
@@ -36,6 +38,7 @@ const STATUS_OPTIONS = [
 
 export default function BudgetForm() {
     const navigation = useNavigation();
+    const { user, signOut } = useAuth();
     const route = useRoute();
     const editId = (route.params as any)?.id as string | undefined;
 
@@ -62,6 +65,8 @@ export default function BudgetForm() {
     }, [editId]);
 
     async function handleSave() {
+        if (!user) return; // Should not happen if authenticated
+
         if (!title.trim() || !client.trim()) {
             Alert.alert('Atenção', 'Preencha o título e o nome do cliente.');
             return;
@@ -77,6 +82,7 @@ export default function BudgetForm() {
                 });
             } else {
                 await createBudget({
+                    user_id: user.id,
                     title: title.trim(),
                     client_name: client.trim(),
                     address: address.trim() || undefined,
@@ -119,7 +125,15 @@ export default function BudgetForm() {
                     <Text style={styles.headerTitle}>
                         {editId ? 'Editar Orçamento' : 'Novo Orçamento'}
                     </Text>
-                    <View style={{ width: 38 }} />
+                    <Pressable
+                        onPress={signOut}
+                        style={({ pressed }) => [
+                            styles.logoutBtn,
+                            pressed && { opacity: 0.7 }
+                        ]}
+                    >
+                        <LogOut size={22} color={COLORS.error} />
+                    </Pressable>
                 </View>
 
                 <ScrollView
@@ -278,7 +292,18 @@ const styles = StyleSheet.create({
         fontFamily: FONTS.bold,
         fontSize: 18,
         color: COLORS.white,
+        flex: 1,
+        textAlign: 'center',
+        marginHorizontal: SPACING.sm,
         letterSpacing: -0.2,
+    },
+    logoutBtn: {
+        width: 40,
+        height: 40,
+        borderRadius: BORDER_RADIUS.md,
+        backgroundColor: 'rgba(255,255,255,0.14)',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 
     scrollContent: {

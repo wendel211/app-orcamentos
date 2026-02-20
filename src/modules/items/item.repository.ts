@@ -6,6 +6,7 @@ import { ItemType, Item } from './item.types';
   Criar item offline
 */
 export async function createItem(data: {
+    user_id: string;
     budget_id: string;
     type: ItemType;
     name: string;
@@ -19,11 +20,12 @@ export async function createItem(data: {
     await db.runAsync(
         `
     INSERT INTO items
-    (id, budget_id, type, name, qty, unit_price, created_at, updated_at, synced)
-    VALUES (?,?,?,?,?,?,?,?,0)
+    (id, user_id, budget_id, type, name, qty, unit_price, created_at, updated_at, synced)
+    VALUES (?,?,?,?,?,?,?,?,?,0)
     `,
         [
             id,
+            data.user_id,
             data.budget_id,
             data.type,
             data.name,
@@ -40,17 +42,17 @@ export async function createItem(data: {
 /*
   Listar itens de um orçamento
 */
-export async function listItems(budget_id: string): Promise<Item[]> {
+export async function listItems(user_id: string, budget_id: string): Promise<Item[]> {
     const db = getDatabase();
 
     return db.getAllAsync<Item>(
         `
     SELECT * FROM items
-    WHERE budget_id = ?
+    WHERE user_id = ? AND budget_id = ?
     AND deleted_at IS NULL
     ORDER BY created_at ASC
     `,
-        budget_id
+        [user_id, budget_id]
     );
 }
 
@@ -118,10 +120,11 @@ export async function deleteItem(id: string) {
 /*
   Buscar itens não sincronizados
 */
-export async function getUnsyncedItems(): Promise<Item[]> {
+export async function getUnsyncedItems(user_id: string): Promise<Item[]> {
     const db = getDatabase();
 
     return db.getAllAsync<Item>(
-        `SELECT * FROM items WHERE synced = 0`
+        `SELECT * FROM items WHERE user_id = ? AND synced = 0`,
+        user_id
     );
 }

@@ -43,6 +43,9 @@ const RegisterScreen = ({ navigation }: any) => {
         setLoading(true);
         try {
             await signUp(email, password, name);
+            Alert.alert('Sucesso', 'Conta criada com sucesso! Faça login para continuar.', [
+                { text: 'OK', onPress: () => navigation.navigate('Login') }
+            ]);
         } catch (error: any) {
             Alert.alert('Erro de Cadastro', error.message);
         } finally {

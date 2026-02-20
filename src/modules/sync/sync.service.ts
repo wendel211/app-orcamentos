@@ -44,18 +44,19 @@ async function getLastSync(): Promise<string> {
 /*
   PUSH → envia alterações locais para o backend
 */
-async function pushChanges() {
+async function pushChanges(userId: string) {
     const db = getDatabase();
 
     const unsyncedBudgets = await db.getAllAsync<Budget>(
         `SELECT * FROM budgets WHERE synced = 0`
     );
 
-    const unsyncedItems = await getUnsyncedItems();
+    const unsyncedItems = await getUnsyncedItems(userId);
 
     if (unsyncedBudgets.length === 0 && unsyncedItems.length === 0) return;
 
     const payload: SyncPushPayload = {
+        userId,
         budgets: unsyncedBudgets,
         items: unsyncedItems
     };
@@ -80,12 +81,12 @@ async function pushChanges() {
 /*
   PULL → busca alterações do backend
 */
-async function pullChanges() {
+async function pullChanges(userId: string) {
     const db = getDatabase();
     const lastSyncAt = await getLastSync();
 
     const response = await api.get<SyncPullResponse>(
-        `/sync/pull?since=${lastSyncAt}`
+        `/sync/pull?since=${lastSyncAt}&userId=${userId}`
     );
 
     const { budgets, items } = response.data;
@@ -94,9 +95,10 @@ async function pullChanges() {
         await db.runAsync(
             `
       INSERT INTO budgets
-      (id,title,client_name,address,discount,extra_fee,status,created_at,updated_at,deleted_at,synced)
-      VALUES (?,?,?,?,?,?,?,?,?,?,1)
+      (id,user_id,title,client_name,address,discount,extra_fee,status,created_at,updated_at,deleted_at,synced)
+      VALUES (?,?,?,?,?,?,?,?,?,?,?,1)
       ON CONFLICT(id) DO UPDATE SET
+        user_id=excluded.user_id,
         title=excluded.title,
         client_name=excluded.client_name,
         address=excluded.address,
@@ -109,6 +111,7 @@ async function pullChanges() {
       `,
             [
                 budget.id,
+                budget.user_id ?? userId,
                 budget.title,
                 budget.client_name,
                 budget.address ?? null,
@@ -126,9 +129,10 @@ async function pullChanges() {
         await db.runAsync(
             `
       INSERT INTO items
-      (id,budget_id,type,name,qty,unit_price,created_at,updated_at,deleted_at,synced)
-      VALUES (?,?,?,?,?,?,?,?,?,1)
+      (id,user_id,budget_id,type,name,qty,unit_price,created_at,updated_at,deleted_at,synced)
+      VALUES (?,?,?,?,?,?,?,?,?,?,1)
       ON CONFLICT(id) DO UPDATE SET
+        user_id=excluded.user_id,
         budget_id=excluded.budget_id,
         type=excluded.type,
         name=excluded.name,
@@ -140,6 +144,7 @@ async function pullChanges() {
       `,
             [
                 item.id,
+                item.user_id ?? userId,
                 item.budget_id,
                 item.type,
                 item.name,
@@ -158,10 +163,15 @@ async function pullChanges() {
 /*
   FUNÇÃO PRINCIPAL DE SINCRONIZAÇÃO
 */
-export async function syncData() {
+export async function syncData(userId: string) {
+    if (!userId || typeof userId !== 'string' || userId.trim() === '') {
+        console.warn('[Sync] Aborting sync: Invalid or missing userId');
+        return { success: false };
+    }
+
     try {
-        await pushChanges();
-        await pullChanges();
+        await pushChanges(userId);
+        await pullChanges(userId);
         return { success: true };
     } catch (error) {
         console.error('Erro na sincronização:', error);

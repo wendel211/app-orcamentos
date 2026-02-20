@@ -14,6 +14,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { listBudgets } from '../budget.repository';
 import { syncData } from '../../sync/sync.service';
 import ConfirmationModal from '../../../components/ConfirmationModal';
+import { useAuth } from '../../auth/contexts/AuthContext';
 import { COLORS, FONTS, SHADOWS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../../theme';
 import {
     Plus,
@@ -29,17 +30,20 @@ import {
     X,
     BarChart2,
     ChevronRight,
+    LogOut,
 } from 'lucide-react-native';
 
 export default function BudgetsList() {
     const navigation = useNavigation();
+    const { user, signOut } = useAuth();
     const [data, setData] = useState<any[]>([]);
     const [refreshing, setRefreshing] = useState(false);
     const [search, setSearch] = useState('');
     const [budgetToDelete, setBudgetToDelete] = useState<any | null>(null);
 
     const load = async () => {
-        const result = await listBudgets();
+        if (!user) return;
+        const result = await listBudgets(user.id);
         setData(result);
     };
 
@@ -58,8 +62,9 @@ export default function BudgetsList() {
     };
 
     const handleRefresh = async () => {
+        if (!user) return;
         setRefreshing(true);
-        await syncData();
+        await syncData(user.id);
         await load();
         setRefreshing(false);
     };
@@ -67,8 +72,10 @@ export default function BudgetsList() {
     useFocusEffect(
         useCallback(() => {
             load();
-            syncData().then(() => load());
-        }, [])
+            if (user) {
+                syncData(user.id).then(() => load());
+            }
+        }, [user])
     );
 
     function formatDate(dateStr: string): string {
@@ -112,12 +119,20 @@ export default function BudgetsList() {
                     <Text style={styles.headerTitle}>Orçamentos</Text>
                     <Text style={styles.headerSub}>Gerencie seus projetos</Text>
                 </View>
-                <Pressable
-                    onPress={() => (navigation as any).navigate('Dashboard')}
-                    style={({ pressed }) => [styles.dashBtn, pressed && { opacity: 0.7 }]}
-                >
-                    <BarChart2 size={24} color={COLORS.white} />
-                </Pressable>
+                <View style={styles.headerActions}>
+                    <Pressable
+                        onPress={() => (navigation as any).navigate('Dashboard')}
+                        style={({ pressed }) => [styles.headerBtn, pressed && { opacity: 0.7 }]}
+                    >
+                        <BarChart2 size={24} color={COLORS.white} />
+                    </Pressable>
+                    <Pressable
+                        onPress={signOut}
+                        style={({ pressed }) => [styles.headerBtn, pressed && { opacity: 0.7 }]}
+                    >
+                        <LogOut size={24} color={COLORS.error} />
+                    </Pressable>
+                </View>
             </View>
 
             {/* Stats Row */}
@@ -297,7 +312,11 @@ const styles = StyleSheet.create({
         marginTop: SPACING.xs,
         fontFamily: FONTS.regular,
     },
-    dashBtn: {
+    headerActions: {
+        flexDirection: 'row',
+        gap: SPACING.md,
+    },
+    headerBtn: {
         width: 44,
         height: 44,
         borderRadius: BORDER_RADIUS.md,
