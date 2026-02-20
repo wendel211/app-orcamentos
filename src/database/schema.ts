@@ -5,6 +5,7 @@ export const schema = `
 
 CREATE TABLE IF NOT EXISTS budgets (
   id TEXT PRIMARY KEY NOT NULL,
+  user_id TEXT,
   title TEXT NOT NULL,
   client_name TEXT NOT NULL,
   address TEXT,
@@ -32,6 +33,7 @@ ON budgets(deleted_at);
 CREATE TABLE IF NOT EXISTS items (
   id TEXT PRIMARY KEY NOT NULL,
   budget_id TEXT NOT NULL,
+  user_id TEXT,
   type TEXT NOT NULL CHECK (type IN ('MATERIAL','MAO_DE_OBRA','SERVICO')),
   name TEXT NOT NULL,
   qty REAL NOT NULL CHECK (qty >= 0),
