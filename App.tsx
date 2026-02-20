@@ -11,10 +11,11 @@ import {
   Inter_700Bold,
   Inter_800ExtraBold,
 } from '@expo-google-fonts/inter';
-import { COLORS } from './src/theme';
+import SplashScreen from './src/modules/common/screens/SplashScreen';
 
 export default function App() {
   const [dbReady, setDbReady] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -24,15 +25,19 @@ export default function App() {
   });
 
   useEffect(() => {
+    // Initialize database
     initDatabase().then(() => setDbReady(true));
+
+    // Keep splash screen for at least 3 seconds to let user read
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 3500);
+
+    return () => clearTimeout(timer);
   }, []);
 
-  if (!dbReady || !fontsLoaded) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.background }}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-      </View>
-    );
+  if (showSplash || !dbReady || !fontsLoaded) {
+    return <SplashScreen />;
   }
 
   return <RootNavigator />;
