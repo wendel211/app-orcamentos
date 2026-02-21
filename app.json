@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "app-orcamentos",
+    "name": "ConstruApp",
     "slug": "app-orcamentos",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/LOGO.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -13,11 +13,13 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
+      "bundleIdentifier": "com.cepdee.apporcamentos",
       "supportsTablet": true
     },
     "android": {
+      "package": "com.cepdee.apporcamentos",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/LOGO.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
@@ -30,6 +32,11 @@
       "expo-sqlite",
       "expo-font",
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "1534c3d4-0e6e-47df-9004-12e4d60bf065"
+      }
+    }
   }
 }
