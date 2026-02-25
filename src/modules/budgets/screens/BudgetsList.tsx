@@ -40,6 +40,7 @@ export default function BudgetsList() {
     const [refreshing, setRefreshing] = useState(false);
     const [search, setSearch] = useState('');
     const [budgetToDelete, setBudgetToDelete] = useState<any | null>(null);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     const load = async () => {
         if (!user) return;
@@ -127,7 +128,7 @@ export default function BudgetsList() {
                         <BarChart2 size={24} color={COLORS.white} />
                     </Pressable>
                     <Pressable
-                        onPress={signOut}
+                        onPress={() => setShowLogoutModal(true)}
                         style={({ pressed }) => [styles.headerBtn, pressed && { opacity: 0.7 }]}
                     >
                         <LogOut size={24} color={COLORS.error} />
@@ -281,6 +282,17 @@ export default function BudgetsList() {
                 onConfirm={confirmDelete}
                 onCancel={() => setBudgetToDelete(null)}
                 type="danger"
+            />
+
+            <ConfirmationModal
+                visible={showLogoutModal}
+                title="Sair da Conta"
+                message="Deseja realmente sair do aplicativo? Você precisará entrar novamente para acessar seus dados."
+                confirmText="Sair agora"
+                cancelText="Permanecer"
+                onConfirm={signOut}
+                onCancel={() => setShowLogoutModal(false)}
+                type="logout"
             />
         </SafeAreaView>
     );

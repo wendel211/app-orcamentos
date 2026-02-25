@@ -41,6 +41,7 @@ export default function BudgetDetails() {
     const { id } = route.params as any;
     const [budget, setBudget] = useState<any>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [itemsTotal, setItemsTotal] = useState(0);
     const [itemsCount, setItemsCount] = useState(0);
 
@@ -131,7 +132,7 @@ export default function BudgetDetails() {
                 </Pressable>
                 <Text style={styles.headerTitle} numberOfLines={1}>{budget?.title || 'Detalhes'}</Text>
                 <Pressable
-                    onPress={signOut}
+                    onPress={() => setShowLogoutModal(true)}
                     style={({ pressed }) => [
                         styles.logoutBtn,
                         pressed && { opacity: 0.7 }
@@ -276,6 +277,17 @@ export default function BudgetDetails() {
                 onConfirm={confirmDelete}
                 onCancel={() => setShowDeleteModal(false)}
                 type="danger"
+            />
+
+            <ConfirmationModal
+                visible={showLogoutModal}
+                title="Sair da Conta"
+                message="Deseja realmente sair do aplicativo? Você precisará entrar novamente para acessar seus dados."
+                confirmText="Sair agora"
+                cancelText="Permanecer"
+                onConfirm={signOut}
+                onCancel={() => setShowLogoutModal(false)}
+                type="logout"
             />
         </SafeAreaView >
     );

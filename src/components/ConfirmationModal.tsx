@@ -9,7 +9,7 @@ import {
     Dimensions,
 } from 'react-native';
 import { COLORS, SHADOWS } from '../theme'; // Adjusted import path assuming it's in src/components
-import { AlertTriangle, Trash2, X } from 'lucide-react-native';
+import { AlertTriangle, Trash2, X, LogOut } from 'lucide-react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -21,7 +21,7 @@ interface ConfirmationModalProps {
     onCancel: () => void;
     confirmText?: string;
     cancelText?: string;
-    type?: 'danger' | 'warning' | 'info';
+    type?: 'danger' | 'warning' | 'info' | 'logout';
 }
 
 export default function ConfirmationModal({
@@ -75,6 +75,8 @@ export default function ConfirmationModal({
                 return <Trash2 size={32} color={COLORS.error} />;
             case 'warning':
                 return <AlertTriangle size={32} color={COLORS.warning} />;
+            case 'logout':
+                return <LogOut size={32} color={COLORS.primary} />;
             default:
                 return <AlertTriangle size={32} color={COLORS.primary} />;
         }
@@ -86,6 +88,8 @@ export default function ConfirmationModal({
                 return '#FECACA'; // Red 200
             case 'warning':
                 return '#FDE68A'; // Amber 200
+            case 'logout':
+                return '#E0E7FF'; // Indigo 100
             default:
                 return '#BFDBFE'; // Blue 200
         }

@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../auth/contexts/AuthContext';
+import ConfirmationModal from '../../../components/ConfirmationModal';
 import { COLORS, FONTS, SHADOWS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../../theme';
 import { getDashboardData, DashboardData } from '../budget.repository';
 import {
@@ -50,6 +51,7 @@ export default function Dashboard() {
     const navigation = useNavigation();
     const { user, signOut } = useAuth();
     const [data, setData] = useState<DashboardData | null>(null);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     useFocusEffect(
         useCallback(() => {
@@ -85,7 +87,7 @@ export default function Dashboard() {
                     <Text style={styles.headerSub}>Visão geral dos seus orçamentos</Text>
                 </View>
                 <Pressable
-                    onPress={signOut}
+                    onPress={() => setShowLogoutModal(true)}
                     style={({ pressed }) => [styles.logoutBtn, pressed && { opacity: 0.7 }]}
                 >
                     <LogOut size={22} color={COLORS.error} />
@@ -223,6 +225,17 @@ export default function Dashboard() {
                 </View>
 
             </ScrollView>
+
+            <ConfirmationModal
+                visible={showLogoutModal}
+                title="Sair da Conta"
+                message="Deseja realmente sair do aplicativo? Você precisará entrar novamente para acessar seus dados."
+                confirmText="Sair agora"
+                cancelText="Permanecer"
+                onConfirm={signOut}
+                onCancel={() => setShowLogoutModal(false)}
+                type="logout"
+            />
         </SafeAreaView>
     );
 }

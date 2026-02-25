@@ -15,6 +15,7 @@ import {
 import { createBudget, updateBudget, getBudget } from '../budget.repository';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAuth } from '../../auth/contexts/AuthContext';
+import ConfirmationModal from '../../../components/ConfirmationModal';
 import { COLORS, FONTS, SHADOWS, SPACING, BORDER_RADIUS } from '../../../theme';
 import {
     Check,
@@ -47,6 +48,7 @@ export default function BudgetForm() {
     const [address, setAddress] = useState('');
     const [status, setStatus] = useState<'EM_ANALISE' | 'ENVIADO' | 'APROVADO' | 'RECUSADO'>('EM_ANALISE');
     const [loading, setLoading] = useState(false);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     //  Load existing budget data when editing
     useEffect(() => {
@@ -126,7 +128,7 @@ export default function BudgetForm() {
                         {editId ? 'Editar Orçamento' : 'Novo Orçamento'}
                     </Text>
                     <Pressable
-                        onPress={signOut}
+                        onPress={() => setShowLogoutModal(true)}
                         style={({ pressed }) => [
                             styles.logoutBtn,
                             pressed && { opacity: 0.7 }
@@ -253,6 +255,17 @@ export default function BudgetForm() {
                     </Pressable>
                 </ScrollView>
             </KeyboardAvoidingView>
+
+            <ConfirmationModal
+                visible={showLogoutModal}
+                title="Sair da Conta"
+                message="Deseja realmente sair do aplicativo? Você precisará entrar novamente para acessar seus dados."
+                confirmText="Sair agora"
+                cancelText="Permanecer"
+                onConfirm={signOut}
+                onCancel={() => setShowLogoutModal(false)}
+                type="logout"
+            />
         </SafeAreaView>
     );
 }

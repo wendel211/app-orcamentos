@@ -51,6 +51,7 @@ export default function BudgetItems() {
     const [extraFee, setExtraFee] = useState('0');
     const [modalVisible, setModalVisible] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     const load = async () => {
         if (!user) return;
@@ -130,7 +131,7 @@ export default function BudgetItems() {
                         <Plus size={20} color={COLORS.white} strokeWidth={3} />
                     </Pressable>
                     <Pressable
-                        onPress={signOut}
+                        onPress={() => setShowLogoutModal(true)}
                         style={({ pressed }) => [styles.headerBtn, pressed && { opacity: 0.7 }]}
                     >
                         <LogOut size={20} color={COLORS.error} />
@@ -293,6 +294,17 @@ export default function BudgetItems() {
                 onConfirm={confirmDeleteItem}
                 onCancel={() => setItemToDelete(null)}
                 type="danger"
+            />
+
+            <ConfirmationModal
+                visible={showLogoutModal}
+                title="Sair da Conta"
+                message="Deseja realmente sair do aplicativo? Você precisará entrar novamente para acessar seus dados."
+                confirmText="Sair agora"
+                cancelText="Permanecer"
+                onConfirm={signOut}
+                onCancel={() => setShowLogoutModal(false)}
+                type="logout"
             />
         </SafeAreaView>
     );
