@@ -8,7 +8,8 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
-    SafeAreaView
+    SafeAreaView,
+    Image
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../../../theme';
@@ -63,7 +64,11 @@ const RegisterScreen = ({ navigation }: any) => {
                     {/* Header Section */}
                     <View style={styles.header}>
                         <View style={styles.logoContainer}>
-                            <Ionicons name="construct" size={50} color={COLORS.accent} />
+                            <Image
+                                source={require('../../../../assets/LOGO.png')}
+                                style={styles.logoImage}
+                                resizeMode="contain"
+                            />
                         </View>
                         <Text style={styles.title}>Crie sua conta</Text>
                         <Text style={styles.subtitle}>Junte-se à ConstruApp hoje</Text>
@@ -176,14 +181,19 @@ const styles = StyleSheet.create({
         marginBottom: 40,
     },
     logoContainer: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: 100,
+        height: 100,
+        borderRadius: 50,
         backgroundColor: COLORS.white,
         justifyContent: 'center',
         alignItems: 'center',
         ...SHADOWS.cardMd,
         marginBottom: SPACING.md,
+        overflow: 'hidden',
+    },
+    logoImage: {
+        width: 75,
+        height: 75,
     },
     title: {
         ...TYPOGRAPHY.h2,

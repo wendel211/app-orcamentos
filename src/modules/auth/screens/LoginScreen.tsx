@@ -8,7 +8,8 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
-    SafeAreaView
+    SafeAreaView,
+    Image
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../../../theme';
@@ -48,7 +49,11 @@ const LoginScreen = ({ navigation }: any) => {
                     {/* Header/Logo Section */}
                     <View style={styles.header}>
                         <View style={styles.logoContainer}>
-                            <Ionicons name="construct" size={60} color={COLORS.accent} />
+                            <Image
+                                source={require('../../../../assets/LOGO.png')}
+                                style={styles.logoImage}
+                                resizeMode="contain"
+                            />
                         </View>
                         <Text style={styles.appName}>ConstruApp</Text>
                         <Text style={styles.tagline}>Orçamentos Profissionais</Text>
@@ -137,14 +142,19 @@ const styles = StyleSheet.create({
         marginBottom: 50,
     },
     logoContainer: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
+        width: 120,
+        height: 120,
+        borderRadius: 60,
         backgroundColor: COLORS.white,
         justifyContent: 'center',
         alignItems: 'center',
         ...SHADOWS.cardMd,
         marginBottom: SPACING.md,
+        overflow: 'hidden',
+    },
+    logoImage: {
+        width: 90,
+        height: 90,
     },
     appName: {
         ...TYPOGRAPHY.display,
