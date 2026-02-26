@@ -9,23 +9,34 @@ import {
     Platform,
     ScrollView,
     SafeAreaView,
-    Image
+    Image,
+    ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../../../theme';
 import { useAuth } from '../contexts/AuthContext';
-import { Alert, ActivityIndicator } from 'react-native';
+import FeedbackModal, { FeedbackType } from '../../../components/FeedbackModal';
 
 const LoginScreen = ({ navigation }: any) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [modal, setModal] = useState<{ visible: boolean; type: FeedbackType; title: string; message: string }>({
+        visible: false,
+        type: 'error',
+        title: '',
+        message: '',
+    });
     const { signIn } = useAuth();
+
+    const showModal = (type: FeedbackType, title: string, message: string) => {
+        setModal({ visible: true, type, title, message });
+    };
 
     const handleLogin = async () => {
         if (!email || !password) {
-            Alert.alert('Erro', 'Por favor, preencha todos os campos.');
+            showModal('warning', 'Campos obrigatórios', 'Por favor, preencha o e-mail e a senha para continuar.');
             return;
         }
 
@@ -33,7 +44,7 @@ const LoginScreen = ({ navigation }: any) => {
         try {
             await signIn(email, password);
         } catch (error: any) {
-            Alert.alert('Erro de Login', error.message);
+            showModal('error', 'Falha no Login', error.message || 'Credenciais inválidas. Verifique seus dados e tente novamente.');
         } finally {
             setLoading(false);
         }
@@ -122,6 +133,14 @@ const LoginScreen = ({ navigation }: any) => {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
+
+            <FeedbackModal
+                visible={modal.visible}
+                type={modal.type}
+                title={modal.title}
+                message={modal.message}
+                onClose={() => setModal(m => ({ ...m, visible: false }))}
+            />
         </SafeAreaView>
     );
 };

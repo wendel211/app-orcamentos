@@ -9,12 +9,13 @@ import {
     Platform,
     ScrollView,
     SafeAreaView,
-    Image
+    Image,
+    ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../../../theme';
 import { useAuth } from '../contexts/AuthContext';
-import { Alert, ActivityIndicator } from 'react-native';
+import FeedbackModal, { FeedbackType } from '../../../components/FeedbackModal';
 
 const RegisterScreen = ({ navigation }: any) => {
     const [name, setName] = useState('');
@@ -23,32 +24,59 @@ const RegisterScreen = ({ navigation }: any) => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [modal, setModal] = useState<{
+        visible: boolean;
+        type: FeedbackType;
+        title: string;
+        message: string;
+        actionText?: string;
+        onAction?: () => void;
+    }>({
+        visible: false,
+        type: 'error',
+        title: '',
+        message: '',
+    });
     const { signUp } = useAuth();
+
+    const showModal = (
+        type: FeedbackType,
+        title: string,
+        message: string,
+        actionText?: string,
+        onAction?: () => void
+    ) => {
+        setModal({ visible: true, type, title, message, actionText, onAction });
+    };
 
     const handleRegister = async () => {
         if (!name || !email || !password || !confirmPassword) {
-            Alert.alert('Erro', 'Por favor, preencha todos os campos.');
+            showModal('warning', 'Campos obrigatórios', 'Por favor, preencha todos os campos para criar sua conta.');
             return;
         }
 
         if (password !== confirmPassword) {
-            Alert.alert('Erro', 'As senhas não conferem.');
+            showModal('warning', 'Senhas diferentes', 'As senhas digitadas não conferem. Verifique e tente novamente.');
             return;
         }
 
         if (password.length < 6) {
-            Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres.');
+            showModal('warning', 'Senha muito curta', 'Sua senha precisa ter pelo menos 6 caracteres.');
             return;
         }
 
         setLoading(true);
         try {
             await signUp(email, password, name);
-            Alert.alert('Sucesso', 'Conta criada com sucesso! Faça login para continuar.', [
-                { text: 'OK', onPress: () => navigation.navigate('Login') }
-            ]);
+            showModal(
+                'success',
+                'Conta criada! 🎉',
+                'Seu cadastro foi realizado com sucesso. Faça login para começar a usar o ConstruApp.',
+                'Fazer Login',
+                () => navigation.navigate('Login')
+            );
         } catch (error: any) {
-            Alert.alert('Erro de Cadastro', error.message);
+            showModal('error', 'Erro no Cadastro', error.message || 'Não foi possível criar sua conta. Tente novamente.');
         } finally {
             setLoading(false);
         }
@@ -161,6 +189,16 @@ const RegisterScreen = ({ navigation }: any) => {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
+
+            <FeedbackModal
+                visible={modal.visible}
+                type={modal.type}
+                title={modal.title}
+                message={modal.message}
+                actionText={modal.actionText}
+                onAction={modal.onAction}
+                onClose={() => setModal(m => ({ ...m, visible: false }))}
+            />
         </SafeAreaView>
     );
 };
