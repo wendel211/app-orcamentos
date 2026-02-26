@@ -18,6 +18,7 @@
     },
     "android": {
       "package": "com.cepdee.apporcamentos",
+      "versionCode": 10,
       "adaptiveIcon": {
         "foregroundImage": "./assets/LOGO.png",
         "backgroundColor": "#ffffff"
