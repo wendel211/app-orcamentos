@@ -70,7 +70,7 @@ const RegisterScreen = ({ navigation }: any) => {
             await signUp(email, password, name);
             showModal(
                 'success',
-                'Conta criada! 🎉',
+                'Conta criada!',
                 'Seu cadastro foi realizado com sucesso. Faça login para começar a usar o ConstruApp.',
                 'Fazer Login',
                 () => navigation.navigate('Login')
