@@ -32,8 +32,6 @@ O ConstruApp foi criado para profissionais da construção civil que precisam ge
 ```bash
 npm install
 npx expo start
-```![WhatsApp Image 2026-03-05 at 00 41 12](https://github.com/user-attachments/assets/aa089300-a30d-45a9-85a5-60adb71f84ce)
-
 
 Configure as variáveis de ambiente no arquivo `.env`:
 ```env
@@ -61,4 +59,5 @@ src/
 <img src="https://github.com/user-attachments/assets/dd7bc432-67b6-4ff8-b045-136492003b0f" width="300">
 
 <img src="https://github.com" width="300">
+
 
