@@ -1,21 +1,20 @@
 import React, { useState } from 'react';
 import {
-    View,
-    Text,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
+    Image,
     KeyboardAvoidingView,
     Platform,
-    ScrollView,
     SafeAreaView,
-    Image,
-    ActivityIndicator,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { COLORS, FONTS, TYPOGRAPHY, SPACING, BORDER_RADIUS, SHADOWS } from '../../../theme';
+import { Lock, Mail, User } from 'lucide-react-native';
+import { COLORS, TYPOGRAPHY, SPACING, SHADOWS } from '../../../theme';
 import { useAuth } from '../contexts/AuthContext';
 import FeedbackModal, { FeedbackType } from '../../../components/FeedbackModal';
+import { AppButton, AppTextField } from '../../../components/ui';
 
 const RegisterScreen = ({ navigation }: any) => {
     const [name, setName] = useState('');
@@ -51,12 +50,12 @@ const RegisterScreen = ({ navigation }: any) => {
 
     const handleRegister = async () => {
         if (!name || !email || !password || !confirmPassword) {
-            showModal('warning', 'Campos obrigatórios', 'Por favor, preencha todos os campos para criar sua conta.');
+            showModal('warning', 'Campos obrigatorios', 'Por favor, preencha todos os campos para criar sua conta.');
             return;
         }
 
         if (password !== confirmPassword) {
-            showModal('warning', 'Senhas diferentes', 'As senhas digitadas não conferem. Verifique e tente novamente.');
+            showModal('warning', 'Senhas diferentes', 'As senhas digitadas nao conferem. Verifique e tente novamente.');
             return;
         }
 
@@ -71,12 +70,12 @@ const RegisterScreen = ({ navigation }: any) => {
             showModal(
                 'success',
                 'Conta criada!',
-                'Seu cadastro foi realizado com sucesso. Faça login para começar a usar o ConstruApp.',
+                'Seu cadastro foi realizado com sucesso. Faca login para comecar a usar o ConstruApp.',
                 'Fazer Login',
                 () => navigation.navigate('Login')
             );
         } catch (error: any) {
-            showModal('error', 'Erro no Cadastro', error.message || 'Não foi possível criar sua conta. Tente novamente.');
+            showModal('error', 'Erro no Cadastro', error.message || 'Nao foi possivel criar sua conta. Tente novamente.');
         } finally {
             setLoading(false);
         }
@@ -89,7 +88,6 @@ const RegisterScreen = ({ navigation }: any) => {
                 style={{ flex: 1 }}
             >
                 <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-                    {/* Header Section */}
                     <View style={styles.header}>
                         <View style={styles.logoContainer}>
                             <Image
@@ -99,90 +97,63 @@ const RegisterScreen = ({ navigation }: any) => {
                             />
                         </View>
                         <Text style={styles.title}>Crie sua conta</Text>
-                        <Text style={styles.subtitle}>Junte-se à ConstruApp hoje</Text>
+                        <Text style={styles.subtitle}>Junte-se a ConstruApp hoje</Text>
                     </View>
 
-                    {/* Form Section */}
                     <View style={styles.form}>
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Nome completo:</Text>
-                            <View style={styles.inputWrapper}>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Como quer ser chamado?"
-                                    placeholderTextColor={COLORS.textMuted}
-                                    value={name}
-                                    onChangeText={setName}
-                                />
-                            </View>
-                        </View>
+                        <AppTextField
+                            label="Nome completo"
+                            placeholder="Como quer ser chamado?"
+                            value={name}
+                            onChangeText={setName}
+                            leftIcon={<User size={19} color={COLORS.primary} />}
+                            containerStyle={styles.field}
+                        />
 
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Seu melhor e-mail:</Text>
-                            <View style={styles.inputWrapper}>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Digite seu e-mail"
-                                    placeholderTextColor={COLORS.textMuted}
-                                    value={email}
-                                    onChangeText={setEmail}
-                                    autoCapitalize="none"
-                                    keyboardType="email-address"
-                                />
-                            </View>
-                        </View>
+                        <AppTextField
+                            label="Seu melhor e-mail"
+                            placeholder="Digite seu e-mail"
+                            value={email}
+                            onChangeText={setEmail}
+                            autoCapitalize="none"
+                            keyboardType="email-address"
+                            leftIcon={<Mail size={19} color={COLORS.primary} />}
+                            containerStyle={styles.field}
+                        />
 
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Defina uma senha:</Text>
-                            <View style={styles.inputWrapper}>
-                                <TextInput
-                                    style={[styles.input, { flex: 1 }]}
-                                    placeholder="Mínimo 6 caracteres"
-                                    placeholderTextColor={COLORS.textMuted}
-                                    value={password}
-                                    onChangeText={setPassword}
-                                    secureTextEntry={!showPassword}
-                                />
-                                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-                                    <Ionicons
-                                        name={showPassword ? "eye-off-outline" : "eye-outline"}
-                                        size={22}
-                                        color={COLORS.textSecondary}
-                                    />
-                                </TouchableOpacity>
-                            </View>
-                        </View>
+                        <AppTextField
+                            label="Defina uma senha"
+                            placeholder="Minimo 6 caracteres"
+                            value={password}
+                            onChangeText={setPassword}
+                            secureToggle
+                            passwordVisible={showPassword}
+                            onTogglePassword={() => setShowPassword(!showPassword)}
+                            leftIcon={<Lock size={19} color={COLORS.primary} />}
+                            containerStyle={styles.field}
+                        />
 
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Confirme sua senha:</Text>
-                            <View style={styles.inputWrapper}>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Repita sua senha"
-                                    placeholderTextColor={COLORS.textMuted}
-                                    value={confirmPassword}
-                                    onChangeText={setConfirmPassword}
-                                    secureTextEntry={!showPassword}
-                                />
-                            </View>
-                        </View>
+                        <AppTextField
+                            label="Confirme sua senha"
+                            placeholder="Repita sua senha"
+                            value={confirmPassword}
+                            onChangeText={setConfirmPassword}
+                            secureTextEntry={!showPassword}
+                            leftIcon={<Lock size={19} color={COLORS.primary} />}
+                            containerStyle={styles.field}
+                        />
 
-                        <TouchableOpacity
-                            style={[styles.registerButton, loading && { opacity: 0.7 }]}
+                        <AppButton
+                            title="Cadastrar"
                             onPress={handleRegister}
                             disabled={loading}
-                        >
-                            {loading ? (
-                                <ActivityIndicator color={COLORS.white} />
-                            ) : (
-                                <Text style={styles.registerButtonText}>Cadastrar</Text>
-                            )}
-                        </TouchableOpacity>
+                            loading={loading}
+                            style={styles.registerButton}
+                        />
                     </View>
 
-                    {/* Footer Section */}
                     <View style={styles.footer}>
-                        <Text style={styles.footerText}>Já possui uma conta? </Text>
+                        <Text style={styles.footerText}>Ja possui uma conta? </Text>
                         <TouchableOpacity onPress={() => navigation.goBack()}>
                             <Text style={styles.loginLink}>Entrar</Text>
                         </TouchableOpacity>
@@ -246,48 +217,12 @@ const styles = StyleSheet.create({
     form: {
         width: '100%',
     },
-    inputGroup: {
+    field: {
         marginBottom: SPACING.lg,
     },
-    label: {
-        ...TYPOGRAPHY.label,
-        color: COLORS.textPrimary,
-        marginBottom: SPACING.sm,
-        fontSize: 12,
-    },
-    inputWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: COLORS.white,
-        borderRadius: BORDER_RADIUS.md,
-        borderWidth: 1,
-        borderColor: COLORS.border,
-        paddingHorizontal: SPACING.md,
-        height: 56,
-    },
-    input: {
-        ...TYPOGRAPHY.body,
-        color: COLORS.textPrimary,
-        height: '100%',
-        width: '100%',
-    },
-    eyeIcon: {
-        padding: 5,
-    },
     registerButton: {
-        backgroundColor: COLORS.primary,
-        height: 56,
-        borderRadius: BORDER_RADIUS.md,
-        justifyContent: 'center',
-        alignItems: 'center',
         marginTop: SPACING.md,
         marginBottom: SPACING.xl,
-        ...SHADOWS.button,
-    },
-    registerButtonText: {
-        ...TYPOGRAPHY.button,
-        color: COLORS.white,
-        fontWeight: 'bold',
     },
     footer: {
         flexDirection: 'row',
