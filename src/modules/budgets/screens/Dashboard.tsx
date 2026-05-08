@@ -1,19 +1,17 @@
 import React, { useCallback, useState } from 'react';
 import {
-    View,
-    Text,
+    SafeAreaView,
     ScrollView,
     StyleSheet,
-    SafeAreaView,
-    Platform,
+    Text,
+    View,
     Pressable,
-    ActivityIndicator,
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../auth/contexts/AuthContext';
 import ConfirmationModal from '../../../components/ConfirmationModal';
 import { COLORS, FONTS, SHADOWS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../../../theme';
-import { getDashboardData, DashboardData } from '../budget.repository';
+import { LoadingState, ScreenHeader, StatusBadge, Surface } from '../../../components/ui';
 import {
     TrendingUp,
     CheckCircle,
@@ -23,11 +21,11 @@ import {
     DollarSign,
     BarChart2,
     Calendar,
-    ChevronLeft,
     Award,
     Target,
     LogOut,
 } from 'lucide-react-native';
+import { getDashboardData, DashboardData } from '../budget.repository';
 
 function fmt(value: number) {
     return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -43,7 +41,7 @@ function fmtShort(value: number) {
 const STATUS_META: Record<string, { label: string; color: string; bg: string; icon: any }> = {
     APROVADO: { label: 'Aprovado', color: COLORS.success, bg: COLORS.successBg, icon: CheckCircle },
     ENVIADO: { label: 'Enviado', color: COLORS.info, bg: COLORS.infoBg, icon: Send },
-    EM_ANALISE: { label: 'Em Análise', color: COLORS.warning, bg: COLORS.warningBg, icon: Clock },
+    EM_ANALISE: { label: 'Em analise', color: COLORS.warning, bg: COLORS.warningBg, icon: Clock },
     RECUSADO: { label: 'Recusado', color: COLORS.error, bg: COLORS.errorBg, icon: AlertCircle },
 };
 
@@ -62,11 +60,7 @@ export default function Dashboard() {
     );
 
     if (!data) {
-        return (
-            <View style={styles.loading}>
-                <ActivityIndicator size="large" color={COLORS.primary} />
-            </View>
-        );
+        return <LoadingState label="Carregando dashboard..." />;
     }
 
     const now = new Date();
@@ -74,30 +68,22 @@ export default function Dashboard() {
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Dark Navy Header */}
-            <View style={styles.header}>
-                <Pressable
-                    onPress={() => navigation.goBack()}
-                    style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.7 }]}
-                >
-                    <ChevronLeft size={24} color={COLORS.white} strokeWidth={2.5} />
-                </Pressable>
-                <View>
-                    <Text style={styles.headerTitle}>Dashboard</Text>
-                    <Text style={styles.headerSub}>Visão geral dos seus orçamentos</Text>
-                </View>
-                <Pressable
-                    onPress={() => setShowLogoutModal(true)}
-                    style={({ pressed }) => [styles.logoutBtn, pressed && { opacity: 0.7 }]}
-                >
-                    <LogOut size={22} color={COLORS.error} />
-                </Pressable>
-            </View>
+            <ScreenHeader
+                title="Dashboard"
+                subtitle="Visao geral dos seus orcamentos"
+                onBack={() => navigation.goBack()}
+                rightAction={
+                    <Pressable
+                        onPress={() => setShowLogoutModal(true)}
+                        style={({ pressed }) => [styles.logoutBtn, pressed && { opacity: 0.7 }]}
+                    >
+                        <LogOut size={22} color={COLORS.error} />
+                    </Pressable>
+                }
+            />
 
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-
-                {/* Revenue Hero Card */}
-                <View style={styles.heroCard}>
+                <Surface style={styles.heroCard}>
                     <View style={styles.heroTop}>
                         <View style={styles.heroIconBox}>
                             <DollarSign size={24} color={COLORS.white} />
@@ -121,40 +107,38 @@ export default function Dashboard() {
                         <View style={styles.heroStatDivider} />
                         <View style={styles.heroStat}>
                             <Award size={14} color="rgba(255,255,255,0.7)" />
-                            <Text style={styles.heroStatLabel}>Ticket médio</Text>
+                            <Text style={styles.heroStatLabel}>Ticket medio</Text>
                             <Text style={styles.heroStatValue}>{fmtShort(data.averageTicket)}</Text>
                         </View>
                     </View>
-                </View>
+                </Surface>
 
-                {/* KPI Row */}
                 <View style={styles.kpiRow}>
-                    <View style={styles.kpiCard}>
+                    <Surface style={styles.kpiCard}>
                         <View style={[styles.kpiIcon, { backgroundColor: '#EFF6FF' }]}>
                             <BarChart2 size={20} color={COLORS.primary} />
                         </View>
                         <Text style={styles.kpiValue}>{data.totalBudgets}</Text>
                         <Text style={styles.kpiLabel}>Total</Text>
-                    </View>
-                    <View style={styles.kpiCard}>
+                    </Surface>
+                    <Surface style={styles.kpiCard}>
                         <View style={[styles.kpiIcon, { backgroundColor: '#DCFCE7' }]}>
                             <Target size={20} color="#166534" />
                         </View>
                         <Text style={[styles.kpiValue, { color: '#166534' }]}>{data.approvalRate}%</Text>
-                        <Text style={styles.kpiLabel}>Aprovação</Text>
-                    </View>
-                    <View style={styles.kpiCard}>
+                        <Text style={styles.kpiLabel}>Aprovacao</Text>
+                    </Surface>
+                    <Surface style={styles.kpiCard}>
                         <View style={[styles.kpiIcon, { backgroundColor: '#DCFCE7' }]}>
                             <CheckCircle size={20} color="#166534" />
                         </View>
                         <Text style={[styles.kpiValue, { color: '#166534' }]}>{data.totalApproved}</Text>
                         <Text style={styles.kpiLabel}>Aprovados</Text>
-                    </View>
+                    </Surface>
                 </View>
 
-                {/* Status Breakdown */}
-                <View style={styles.card}>
-                    <Text style={styles.cardTitle}>Por Status</Text>
+                <Surface style={styles.card}>
+                    <Text style={styles.cardTitle}>Por status</Text>
                     {[
                         { key: 'APROVADO', count: data.totalApproved },
                         { key: 'ENVIADO', count: data.totalSent },
@@ -186,13 +170,12 @@ export default function Dashboard() {
                             </View>
                         );
                     })}
-                </View>
+                </Surface>
 
-                {/* Recent Budgets */}
-                <View style={styles.card}>
+                <Surface style={styles.card}>
                     <Text style={styles.cardTitle}>Recentes</Text>
                     {data.recentBudgets.length === 0 ? (
-                        <Text style={styles.emptyText}>Nenhum orçamento ainda</Text>
+                        <Text style={styles.emptyText}>Nenhum orcamento ainda</Text>
                     ) : (
                         data.recentBudgets.map((b) => {
                             const meta = STATUS_META[b.status ?? 'EM_ANALISE'];
@@ -213,23 +196,22 @@ export default function Dashboard() {
                                         <Text style={styles.recentTitle} numberOfLines={1}>{b.title}</Text>
                                         <Text style={styles.recentClient} numberOfLines={1}>{b.client_name}</Text>
                                     </View>
-                                    <View style={[styles.recentBadge, { backgroundColor: meta.bg }]}>
-                                        <Text style={[styles.recentBadgeText, { color: meta.color }]}>
-                                            {meta.label}
-                                        </Text>
-                                    </View>
+                                    <StatusBadge
+                                        label={meta.label}
+                                        color={meta.color}
+                                        backgroundColor={meta.bg}
+                                    />
                                 </Pressable>
                             );
                         })
                     )}
-                </View>
-
+                </Surface>
             </ScrollView>
 
             <ConfirmationModal
                 visible={showLogoutModal}
                 title="Sair da Conta"
-                message="Deseja realmente sair do aplicativo? Você precisará entrar novamente para acessar seus dados."
+                message="Deseja realmente sair do aplicativo? Voce precisara entrar novamente para acessar seus dados."
                 confirmText="Sair agora"
                 cancelText="Permanecer"
                 onConfirm={signOut}
@@ -244,32 +226,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: COLORS.background,
-        paddingTop: Platform.OS === 'android' ? 40 : 0,
-    },
-    loading: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: COLORS.background,
-    },
-
-    // Header — dark navy
-    header: {
-        backgroundColor: COLORS.primary,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: SPACING.screen,
-        paddingTop: Platform.OS === 'android' ? 52 : SPACING.xl,
-        paddingBottom: SPACING.xl,
-    },
-    backBtn: {
-        width: 40,
-        height: 40,
-        borderRadius: BORDER_RADIUS.md,
-        backgroundColor: 'rgba(255,255,255,0.14)',
-        alignItems: 'center',
-        justifyContent: 'center',
     },
     logoutBtn: {
         width: 40,
@@ -279,29 +235,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    headerTitle: {
-        fontFamily: FONTS.bold,
-        fontSize: 19,
-        color: COLORS.white,
-        textAlign: 'center',
-        letterSpacing: -0.3,
-    },
-    headerSub: {
-        fontFamily: FONTS.regular,
-        fontSize: 12,
-        color: 'rgba(255,255,255,0.6)',
-        textAlign: 'center',
-        marginTop: 2,
-    },
-
     content: {
         padding: SPACING.screen,
         paddingBottom: 56,
     },
-
-    // Hero card
     heroCard: {
         backgroundColor: COLORS.primary,
+        borderColor: COLORS.primary,
         borderRadius: BORDER_RADIUS.xxl,
         padding: SPACING.cardLg,
         marginBottom: SPACING.md,
@@ -365,8 +305,6 @@ const styles = StyleSheet.create({
         color: COLORS.white,
         letterSpacing: -0.2,
     },
-
-    // KPI row
     kpiRow: {
         flexDirection: 'row',
         gap: SPACING.md,
@@ -374,11 +312,8 @@ const styles = StyleSheet.create({
     },
     kpiCard: {
         flex: 1,
-        backgroundColor: COLORS.card,
-        borderRadius: BORDER_RADIUS.xl,
         padding: SPACING.lg,
         alignItems: 'flex-start',
-        ...SHADOWS.card,
     },
     kpiIcon: {
         width: 36,
@@ -401,14 +336,8 @@ const styles = StyleSheet.create({
         marginTop: 3,
         letterSpacing: 0.2,
     },
-
-    // Card
     card: {
-        backgroundColor: COLORS.card,
-        borderRadius: BORDER_RADIUS.xl,
-        padding: SPACING.card,
         marginBottom: SPACING.md,
-        ...SHADOWS.card,
     },
     cardTitle: {
         fontFamily: FONTS.bold,
@@ -417,8 +346,6 @@ const styles = StyleSheet.create({
         marginBottom: SPACING.lg,
         letterSpacing: -0.3,
     },
-
-    // Status breakdown
     statusRow: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -455,8 +382,6 @@ const styles = StyleSheet.create({
         width: 24,
         textAlign: 'right',
     },
-
-    // Recent budgets
     recentRow: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -483,16 +408,6 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: COLORS.textSecondary,
         marginTop: 2,
-    },
-    recentBadge: {
-        paddingHorizontal: SPACING.sm,
-        paddingVertical: 3,
-        borderRadius: BORDER_RADIUS.pill,
-    },
-    recentBadgeText: {
-        fontFamily: FONTS.semiBold,
-        fontSize: 10,
-        letterSpacing: 0.3,
     },
     emptyText: {
         fontFamily: FONTS.regular,
